@@ -16,12 +16,7 @@ class Map:
         pass
     
     def __update_point(self, move : int) -> None:
-        if self.__position_y == -1:
-            index = self.__position_x - int(self.__width / 2) + 1
-        elif self.__position_y == self.__height + 1:
-            index = len(self.__points) - 3 + self.__position_x - int(self.__width / 2) + 1
-        else:
-            index = 3 + (self.__width + 1) * self.__position_y + self.__position_x
+        index = self.__get_current_point_index()
         point = self.__points[index]
         point.do_move(move)
 
@@ -41,5 +36,40 @@ class Map:
         elif move in down_moves:
             self.__position_y += 1
 
-    def show_position(self) -> None:
-        print(f"X: {self.__position_x} Y: {self.__position_y}")
+    def is_continuous_move_possible(self) -> bool:
+        if self.__position_y in [-1, self.__height + 1]:
+            return False
+        point = self.__points[self.__get_current_point_index()]
+        counter = sum(point.lines)
+
+        if self.__position_x in [0, self.__width]:
+            if counter == 3:
+                return False
+            elif self.__position_y in [0, self.__height]:
+                return False
+            else:
+                return True
+        
+        if self.__position_y in [0, self.__height]:
+            if self.__position_x < (self.__width/2 - 1) or self.__position_x > (self.__width/2 + 1):
+                if counter == 3:
+                    return False
+                else:
+                    return True
+            else:
+                if self.__position_x != self.__width/2:
+                    if counter == 5:
+                        return False
+                    else:
+                        return True
+        
+        return counter > 1
+
+    def __get_current_point_index(self) -> int:
+        if self.__position_y == -1:
+            index = self.__position_x - int(self.__width / 2) + 1
+        elif self.__position_y == self.__height + 1:
+            index = len(self.__points) - 3 + self.__position_x - int(self.__width / 2) + 1
+        else:
+            index = 3 + (self.__width + 1) * self.__position_y + self.__position_x
+        return index
