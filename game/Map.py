@@ -10,15 +10,19 @@ class Map:
         self.__points = [Point() for i in range(0, 6 + (width + 1) * (height + 1))]
 
     def make_move(self, move : int) -> None:
-        self.__update_point(move)
+        self.__update_point(move, True)
         self.__make_move(move)
-        self.__update_point((move + 4) % 8)
-        pass
+        self.__update_point((move + 4) % 8, True)
     
-    def __update_point(self, move : int) -> None:
+    def revert_move(self, move : int) -> None:
+        self.__update_point((move + 4) % 8, False)
+        self.__make_move((move + 4) % 8)
+        self.__update_point(move, False)
+
+    def __update_point(self, move : int, value : bool) -> None:
         index = self.__get_current_point_index()
         point = self.__points[index]
-        point.do_move(move)
+        point.do_move(move, value)
 
     def __make_move(self, move : int) -> None:
         left_moves = [1, 2, 3]
