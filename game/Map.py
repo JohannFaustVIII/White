@@ -2,6 +2,8 @@ from Point import Point
 
 class Map:
 
+    __second_player_moves = [4, 5, 6, 7, 0, 1, 2, 3]
+
     def __init__(self, width : int, height : int) -> None:
         self.__width = width
         self.__height = height
