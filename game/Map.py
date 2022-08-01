@@ -11,16 +11,37 @@ class Map:
         self.__position_y = int(height/2)
         self.__points = [Point() for i in range(0, 6 + (width + 1) * (height + 1))]
 
+    def make_move(self, move : int, first_player : bool) -> None:
+        if bool == True:
+            self.make_move(move)
+        else:
+            self.make_move(Map.__second_player_moves[move])
+
     def make_move(self, move : int) -> None:
         self.__update_point(move, True)
         self.__make_move(move)
         self.__update_point((move + 4) % 8, True)
     
+    def revert_move(self, move : int, first_player : bool) -> None:
+        if first_player:
+            self.revert_move(move)
+        else:
+            self.revert_move(Map.__second_player_moves[move])
+
     def revert_move(self, move : int) -> None:
         self.__update_point((move + 4) % 8, False)
         self.__make_move((move + 4) % 8)
         self.__update_point(move, False)
 
+    def is_enemy_goal(self, first_player : bool) -> None:
+        return self.is_goal(not first_player)
+
+    def is_goal(self, first_player : bool) -> None:
+        if first_player:
+            return self.__position_y == -1
+        else:
+            return self.__position_y == self.__height + 1
+    
     def __update_point(self, move : int, value : bool) -> None:
         index = self.__get_current_point_index()
         point = self.__points[index]
