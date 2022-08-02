@@ -50,7 +50,7 @@ class Map:
     def __make_move(self, move : int) -> None:
         left_moves = [1, 2, 3]
         right_moves = [5, 6, 7]
-        up_moves = [7, 0 ,1]
+        up_moves = [7, 0, 1]
         down_moves = [3, 4, 5]
 
         if move in left_moves:
@@ -62,6 +62,61 @@ class Map:
             self.__position_y -= 1
         elif move in down_moves:
             self.__position_y += 1
+
+    def is_move_possible(self, move : int) -> bool:
+        if self.__position_y == -1 or self.__position_y == self.__height + 1 :
+            return True
+        match move:
+            case 0:
+                if self.__position_x in [0, self.__width]:
+                    return False
+                if self.__position_y == 0 and self.__position_x != int(self.__width/2):
+                    return False
+                pass
+            case 1:
+                if self.__position_x == self.__width:
+                    return False
+                if self.__position_y == 0 and self.__position_x not in [int(self.__width/2), int(self.__width/2)-1]:
+                    return False
+                pass
+            case 2:
+                if self.__position_x == self.__width:
+                    return False
+                if self.__position_y in [0, self.__height] and self.__position_x not in [int(self.__width/2), int(self.__width/2)-1]:
+                    return False
+                pass
+            case 3:
+                if self.__position_x == self.__width:
+                    return False
+                if self.__position_y == self.__height and self.__position_x not in [int(self.__width/2), int(self.__width/2)-1]:
+                    return False
+                pass
+            case 4:
+                if self.__position_x in [0, self.__width]:
+                    return False
+                if self.__position_y == self.__height and self.__position_x != int(self.__width/2):
+                    return False
+                pass
+            case 5:
+                if self.__position_x == 0:
+                    return False
+                if self.__position_y == self.__height and self.__position_x not in [int(self.__width/2), int(self.__width/2)+1]:
+                    return False
+                pass
+            case 6:
+                if self.__position_x == 0:
+                    return False
+                if self.__position_y in [0, self.__height] and self.__position_x not in [int(self.__width/2), int(self.__width/2)+1]:
+                    return False
+                pass
+            case 7:
+                if self.__position_x == 0:
+                    return False
+                if self.__position_y == 0 and self.__position_x not in [int(self.__width/2), int(self.__width/2)+1]:
+                    return False
+                pass
+        return not self.__points[self.__get_current_point_index].get_move(move)
+
 
     def is_continuous_move_possible(self) -> bool:
         if self.__position_y in [-1, self.__height + 1]:
