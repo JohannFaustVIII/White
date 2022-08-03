@@ -1,3 +1,4 @@
+from turtle import width
 from Point import Point
 
 class Map:
@@ -155,3 +156,21 @@ class Map:
         else:
             index = 3 + (self.__width + 1) * self.__position_y + self.__position_x
         return index
+
+    def get_map_as_list(self, first_player : bool) -> list[int]:
+        if (first_player):
+            goal_points = self.__points[3 + int(self.__width/2) - 1: 3 + int(self.__width/2) + 2]
+            enemy_goal = [x.get_move(1) for x in goal_points[0:-1]] + [x.get_move(0) for x in goal_points[1:-1]] + [x.get_move(7) for x in goal_points[1:]] + [x.get_move(2) for x in goal_points[0:-1]]
+            middle_points = []
+            for i in range(0, self.__height):
+                shift_index = 3 + (self.__width + 1) * i
+                points = self.__points[shift_index : shift_index + self.__width + 1]
+                middle_points += [x.get_move(1) for x in points[0:-1]]
+                middle_points += [x.get_move(0) for x in points[1:-1]]
+                middle_points += [x.get_move(7) for x in points[1:]]
+                if (i != self.__height - 1):
+                    middle_points += [x.get_move(2) for x in points[0:-1]]
+            my_goal_shift = len(self.__points) - (3 + int(self.__width/2) + 1) - 1
+            my_goal_points = self.__points[my_goal_shift: my_goal_shift + 2]
+            my_goal = [x.get_move(2) for x in my_goal_points[0:-1]] + [x.get_move(5) for x in my_goal_points[1:]] + [x.get_move(4) for x in my_goal_points[1:-1]] + [x.get_move(3) for x in my_goal_points[0:-1]]
+            return enemy_goal + middle_points + my_goal
