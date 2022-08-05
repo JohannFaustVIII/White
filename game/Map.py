@@ -1,3 +1,4 @@
+from collections import deque
 from Point import Point
 
 class Map:
@@ -194,7 +195,24 @@ class Map:
             my_goal = [x.get_move(2) for x in my_goal_points[0:-1]] + [x.get_move(5) for x in my_goal_points[1:]] + [x.get_move(4) for x in my_goal_points[1:-1]] + [x.get_move(3) for x in my_goal_points[0:-1]]
             return enemy_goal + middle_points + my_goal
 
+    def get_points(self, first_player) -> list[int]:
+        if first_player:
+            result = [Map.__bool_to_int_list(x.lines) for x in self.__points]
+            return result
+        else:
+            result = [Map.__bool_to_int_list(Map.__rotate_list_for_second_player(x.lines)) for x in self.__points]
+            result.reverse()
+            return result
+    
+    def __bool_to_int_list(list : list[bool]) -> list[int]:
+        return [int(x) for x in list]
 
-arr = [0, 1, 2]
+    def __rotate_list_for_second_player(list_to_rotate : list[bool]) -> list[bool]:
+        d = deque(list_to_rotate)
+        d.rotate(4)
+        return list(d)
 
-print(arr[:-1:-1])
+map = Map(10, 10)
+map.make_move(0)
+print(map.get_points(True))
+print(map.get_points(False))
