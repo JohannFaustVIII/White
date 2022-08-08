@@ -1,4 +1,5 @@
 from collections import deque
+from itertools import chain
 from Point import Point
 
 class Map:
@@ -157,52 +158,13 @@ class Map:
             index = 3 + (self.__width + 1) * self.__position_y + self.__position_x
         return index
 
-    def get_map_as_list(self, first_player : bool) -> list[int]:
-        if (first_player):
-            goal_points = self.__points[3 + int(self.__width/2) - 1: 3 + int(self.__width/2) + 2]
-            enemy_goal = [x.get_move(1) for x in goal_points[0:-1]] + [x.get_move(0) for x in goal_points[1:-1]] + [x.get_move(7) for x in goal_points[1:]] + [x.get_move(2) for x in goal_points[0:-1]]
-            middle_points = []
-            for i in range(0, self.__height):
-                shift_index = 3 + (self.__width + 1) * i
-                points = self.__points[shift_index : shift_index + self.__width + 1]
-                middle_points += [x.get_move(1) for x in points[0:-1]]
-                middle_points += [x.get_move(0) for x in points[1:-1]]
-                middle_points += [x.get_move(7) for x in points[1:]]
-                if (i != self.__height - 1):
-                    middle_points += [x.get_move(2) for x in points[0:-1]]
-            my_goal_shift = len(self.__points) - (3 + int(self.__width/2) + 1) - 1
-            my_goal_points = self.__points[my_goal_shift: my_goal_shift + 3]
-            my_goal = [x.get_move(2) for x in my_goal_points[0:-1]] + [x.get_move(5) for x in my_goal_points[1:]] + [x.get_move(4) for x in my_goal_points[1:-1]] + [x.get_move(3) for x in my_goal_points[0:-1]]
-            return enemy_goal + middle_points + my_goal
-        else:
-            goal_shift = len(self.__points) - (3 + int(self.__width/2) + 1) - 1
-            goal_points = self.__points[goal_shift: goal_shift + 3]
-            goal_points.reverse()
-            enemy_goal = [x.get_move(5) for x in goal_points[0:-1]] + [x.get_move(4) for x in goal_points[1:-1]] + [x.get_move(3) for x in goal_points[1:]] + [x.get_move(2) for x in goal_points[1:]]
-            middle_points = []
-            for i in range(0, self.__height):
-                shift_index = 3 + (self.__width + 1) * i
-                points = self.__points[shift_index : shift_index + self.__width + 1]
-                points.reverse()
-                # continue from here, I'm not sure about counting
-                middle_points += [x.get_move(1) for x in points[0:-1]]
-                middle_points += [x.get_move(0) for x in points[1:-1]]
-                middle_points += [x.get_move(7) for x in points[1:]]
-                if (i != self.__height - 1):
-                    middle_points += [x.get_move(2) for x in points[0:-1]]
-            my_goal_shift = len(self.__points) - (3 + int(self.__width/2) + 1) - 1
-            my_goal_points = self.__points[my_goal_shift: my_goal_shift + 2]
-            my_goal = [x.get_move(2) for x in my_goal_points[0:-1]] + [x.get_move(5) for x in my_goal_points[1:]] + [x.get_move(4) for x in my_goal_points[1:-1]] + [x.get_move(3) for x in my_goal_points[0:-1]]
-            return enemy_goal + middle_points + my_goal
-
     def get_points(self, first_player) -> list[int]:
         if first_player:
             result = [Map.__bool_to_int_list(x.lines) for x in self.__points]
-            return result
         else:
             result = [Map.__bool_to_int_list(Map.__rotate_list_for_second_player(x.lines)) for x in self.__points]
             result.reverse()
-            return result
+        return Map.__merge_lists_into_single_list(result)
     
     def __bool_to_int_list(list : list[bool]) -> list[int]:
         return [int(x) for x in list]
@@ -212,7 +174,5 @@ class Map:
         d.rotate(4)
         return list(d)
 
-map = Map(10, 10)
-map.make_move(0)
-print(map.get_points(True))
-print(map.get_points(False))
+    def __merge_lists_into_single_list(lists : list[list[int]]) -> list[int]:
+        return list(chain.from_iterable(lists))
