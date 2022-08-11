@@ -65,6 +65,9 @@ class Map:
         elif move in down_moves:
             self.__position_y += 1
 
+    def get_possible_moves(self) -> list[int]:
+        return [x for x in range(0, 8) if self.is_move_possible(x)]
+
     def is_move_possible(self, move : int) -> bool:
         if self.__position_y == -1 or self.__position_y == self.__height + 1 :
             return True
@@ -117,7 +120,7 @@ class Map:
                 if self.__position_y == 0 and self.__position_x not in [int(self.__width/2), int(self.__width/2)+1]:
                     return False
                 pass
-        return not self.__points[self.__get_current_point_index].get_move(move)
+        return not self.__points[self.__get_current_point_index()].get_move(move)
 
 
     def is_continuous_move_possible(self) -> bool:
