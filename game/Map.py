@@ -13,6 +13,12 @@ class Map:
         self.__position_y = int(height/2)
         self.__points = [Point() for i in range(0, 6 + (width + 1) * (height + 1))]
 
+    def get_points_for_move(self, move : int, first_player : bool) -> list[int]:
+        self.make_move(move, first_player)
+        result = self.get_points(first_player)
+        self.revert_move(move, first_player)
+        return result
+
     def make_move(self, move : int, first_player : bool) -> None:
         if bool == True:
             self.make_move(move)
