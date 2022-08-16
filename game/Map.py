@@ -128,7 +128,6 @@ class Map:
                 pass
         return not self.__points[self.__get_current_point_index()].get_move(move)
 
-
     def is_continuous_move_possible(self) -> bool:
         if self.__position_y in [-1, self.__height + 1]:
             return False
