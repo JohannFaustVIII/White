@@ -19,13 +19,9 @@ class Map:
         self.revert_move(move, first_player)
         return result
 
-    def make_move(self, move : int, first_player : bool) -> None:
-        if bool == True:
-            self.make_move(move)
-        else:
-            self.make_move(Map.__second_player_moves[move])
-
-    def make_move(self, move : int) -> None:
+    def make_move(self, move : int, first_player : bool = True) -> None:
+        if not first_player:
+            move = Map.__second_player_moves[move]
         self.__update_point(move, True)
         self.__make_move(move)
         self.__update_point((move + 4) % 8, True)
@@ -40,6 +36,9 @@ class Map:
         self.__update_point((move + 4) % 8, False)
         self.__make_move((move + 4) % 8)
         self.__update_point(move, False)
+
+    def is_end_of_game(self) -> bool:
+        return self.is_goal(True) or self.is_goal(False) or not self.get_possible_moves()
 
     def is_enemy_goal(self, first_player : bool) -> None:
         return self.is_goal(not first_player)

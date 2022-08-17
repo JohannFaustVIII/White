@@ -8,14 +8,15 @@ class Game:
         self.__first_player = first_player
         self.__second_player = second_player
     
-    def play(self):
+    def play(self) -> bool: # is first player win, TODO: refactor
         side = True # is_current_first_player (TODO: think about good name)
-        # while is any move possible: (TODO: implement this check in Map)
-        #   if continuous move NOT possible:
-        #       change player
-        #   get move from current player
-        #   make a move on the map
-        # if is_goal(True): first won
-        # if is_goal(False): second won
-        # if NOT is_any_move_possible: current side lost
-        pass
+        while self.__map.is_end_of_game():
+            if not self.__map.is_continuous_move_possible():
+                side = not side
+            move = self.__first_player(self.__map) if side else self.__second_player(self.__map)
+            self.__map.make_move(move, side)
+        if self.__map.is_goal(True):
+            return True
+        if self.__map.is_goal(False):
+            return False
+        return not side # current side lost?
