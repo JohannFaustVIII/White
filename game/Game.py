@@ -31,7 +31,7 @@ class Game:
             self.is_second_player_win = True
             return
 
-        if is_first_player_move: ## current side can't make a move
+        if is_first_player_move: # current side can't make a move
             self.is_second_player_win = True
         else:
             self.is_first_player_win = True
