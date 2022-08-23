@@ -27,12 +27,8 @@ class Map:
         self.__update_point((move + 4) % 8, True)
     
     def revert_move(self, move : int, first_player : bool) -> None:
-        if first_player:
-            self.revert_move(move)
-        else:
-            self.revert_move(Map.__second_player_moves[move])
-
-    def revert_move(self, move : int) -> None:
+        if not first_player:
+            move = Map.__second_player_moves[move]
         self.__update_point((move + 4) % 8, False)
         self.__make_move((move + 4) % 8)
         self.__update_point(move, False)

@@ -1,27 +1,23 @@
+import random
 from Map import Map
 from Player import Player
 
 class NNPlayer(Player):
 
-    def __init__(self) -> None:
+    def __init__(self, discover : float) -> None:
         super().__init__()
         # player's parameters have to be set from the outside
         # 1. here to provide NN and check its parameters? or load here? first option looks better
-        # 2. add setting flag to register moves (training to be done outside) <- that requires a list of end positions of this player
-        # 3. pass discover parameter to enable discovering new moves
+        self.discover = discover
 
-    def get_move(self, map : Map) -> int:
-        # if random less than discover:
-        #   get available moves
-        #   choose random of them
-        #   save state after move ??? <- is it required? if move will be returned outside, then state after move can be saved there?
-        #   return move
-        # else:
-        #   get available move
-        #   for each available move:
-        #       get state of map after move
-        #       get state prediction from NN (value between 0 to 1, 0 - state lost, 1 - state win)
-        #       decide about maximum <- the closest to win
-        #   save state after move ??? <- again to think
-        #   return move making a state the closest to a win
-        pass
+    def get_move(self, map : Map, first_player : bool) -> int:
+        moves = map.get_possible_moves()
+        print(moves)
+        if random.random() < self.discover:
+            print("Random!")
+            return random.choice(moves)
+        else:
+            print("Value!")
+            valued_moves = [(move, random.random(), map.get_points_for_move(move, first_player)) for move in moves] # the state pass to NN, get state prediction from NN (value between 0 to 1, 0 - state lost, 1 - state win)
+            max_move = max(valued_moves, key=lambda x: x[1])
+            return max_move[0]
