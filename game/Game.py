@@ -42,3 +42,13 @@ class Game:
             self.is_second_player_win = True
         else:
             self.is_first_player_win = True
+
+    def get_winner_states(self) -> list[list[int]]:
+        if not self.is_game_finished:
+            return []
+        return self.__first_player_states if self.is_first_player_win else self.__second_player_states
+
+    def get_loser_states(self) -> list[list[int]]:
+        if not self.is_game_finished:
+            return []
+        return self.__first_player_states if self.is_second_player_win else self.__second_player_states
