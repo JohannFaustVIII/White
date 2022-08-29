@@ -1,8 +1,10 @@
 from Game import Game
 from NNPlayer import NNPlayer
+from game.StateData import StateData
 
 class NNGame:
-    pass
+    
+    __states_data = {}
 
     def train(self, discover : float):
         # 1. load NN, a single one, from a file, or create it (optional parameter? no, check if file exists, if is, load, if not, only to save later)
@@ -11,9 +13,22 @@ class NNGame:
         for i in range(0, 100): #TODO: change number of iterations
             game = Game(player, player, True)
             game.play_game()
-            # TODO: how should stats object look like?
-        # 3.2. get losing and wining states (based on the game result)
-        # 3.3. update statistics, compute the percent of wins in given position (between 0 and 1)
+            for state in game.get_winner_states(): #TODO: to refactor? looks like can be moved to a separate method, and the increase part can be refactored too
+                state_name = StateData.state_to_string(state)
+                state_to_update = self.__states_data[state_name]
+                if not state_to_update:
+                    state_to_update = StateData(state)
+                    self.__states_data[state_name] = state_to_update
+                state_to_update.increase_wins()
+                    
+            for state in game.get_loser_states():
+                state_name = StateData.state_to_string(state)
+                state_to_update = self.__states_data[state_name]
+                if not state_to_update:
+                    state_to_update = StateData(state)
+                    self.__states_data[state_name] = state_to_update
+                state_to_update.increase_loses()
+
         # 4. train NN with the statistics
         # 5. save NN after training
         # 6. save stats? and maybe load them before? at some point, stats should be dropped, as more experienced NN would be, to think
