@@ -13,11 +13,10 @@ class NNPlayer(Player):
         self.discover = discover
 
     def get_move(self, map : Map, first_player : bool) -> int:
-        moves = map.get_possible_moves()
-        print(moves)
+        moves = map.get_possible_moves(first_player)
         if random.random() < self.discover:
             return random.choice(moves)
         else:
-            valued_moves = [(move, self.model.preditct(map.get_points_for_move(move, first_player))) for move in moves]
+            valued_moves = [(move, self.model.predict(map.get_points_for_move(move, first_player))) for move in moves]
             max_move = max(valued_moves, key=lambda x: x[1])
             return max_move[0]

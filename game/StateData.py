@@ -16,6 +16,9 @@ class StateData:
     def increase_wins(self) -> None:
         self.__wins = self.__wins + 1
 
+    def get_wins(self) -> int:
+        return self.__wins
+
     def get_win_percentage(self) -> float:
         sum = self.__loses + self.__wins
         return self.__wins/sum if sum != 0 else 0

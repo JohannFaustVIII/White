@@ -66,8 +66,9 @@ class Map:
         elif move in down_moves:
             self.__position_y += 1
 
-    def get_possible_moves(self) -> list[int]:
-        return [x for x in range(0, 8) if self.is_move_possible(x)]
+    def get_possible_moves(self, is_first_player: bool = True) -> list[int]:
+        possible = [x for x in range(0, 8) if self.is_move_possible(x)]
+        return possible if is_first_player else [Map.__second_player_moves[move] for move in possible]
 
     def is_move_possible(self, move : int) -> bool:
         if self.__position_y == -1 or self.__position_y == self.__height + 1 :
