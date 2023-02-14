@@ -22,16 +22,10 @@ class NNGame:
         # 7. go back to point 2? (it needs to be a loop too to stop at given point, or another thread, and send a signal to stop, gracefully, to think)
 
     def generate_data(self, file_name: str, iterations: int, discover: float):
-        print('1')
         self.__states_data = {}
-        print('2')
         self.__play_games(iterations, discover)
-        print('3')
         self.__save_games(file_name, iterations)
-        print('4')
         self.__states_data = {}
-        print('5')
-
         
     def __play_games(self, iterations: int, discover: float):
         model = None # placeholder
@@ -45,10 +39,11 @@ class NNGame:
 
     def __save_games(self, file_name: str, iterations: int):
         print('Saving games')
-        with open(file_name, "w") as file:
-            file.write(str(iterations)+'\n')
-            for key, value in self.__states_data.items():
-                file.write(f"{key}:{value.get_wins()}\n")
+        with open(file_name+"x", "w") as filex:
+            with open(file_name+"y", "w") as filey:
+                for key, value in self.__states_data.items():
+                    filex.write(f"{','.join([c for c in key])}\n")
+                    filey.write(f"{value.get_win_percentage()}\n")
         print('Done')
 
     def __update_states(self, increase, states : list[list[int]]) -> None:
