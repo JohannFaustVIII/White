@@ -1,3 +1,6 @@
+import tensorflow as tf
+import numpy as np
+import sklearn.model_selection
 from Game import Game
 from NNPlayer import NNPlayer
 from StateData import StateData
@@ -6,29 +9,45 @@ class NNGame:
     
     __states_data = {}
 
-    def train(self, discover : float):
-        # 1. load NN, a single one, from a file, or create it (optional parameter? no, check if file exists, if is, load, if not, only to save later)
-        model = None # placeholder
-        player = NNPlayer(model, discover) # to think: discover should be flexible and change between iterations, and... do we need two players?
-        for i in range(0, 100): #TODO: change number of iterations
-            game = Game(player, player, True)
-            game.play_game()
-            self.__update_states(StateData.increase_wins, game.get_winner_states())
-            self.__update_states(StateData.increase_loses, game.get_loser_states())
+    def train(self, file_name: str, iterations: int, discover : float, model_file: str):
+        counter = 0
+        model = self.__load_model(model_file)
+        while counter < 1:
+            counter += 1
+            print(f'Loop: {counter}')
+            self.generate_data(file_name, iterations, discover, model)
+            self.__train(model, file_name, model_file)
 
-        # 4. train NN with the statistics
-        # 5. save NN after training
-        # 6. save stats? and maybe load them before? at some point, stats should be dropped, as more experienced NN would be, to think
-        # 7. go back to point 2? (it needs to be a loop too to stop at given point, or another thread, and send a signal to stop, gracefully, to think)
+    def __load_model(self, file: str):
+        new_model = tf.keras.models.load_model(file)
+        new_model.summary()
+        return new_model
 
-    def generate_data(self, file_name: str, iterations: int, discover: float):
+    def __train(self, model, file_name: str, model_file: str):
+        X_train, y_train, X_valid, y_valid = self.__load_data(file_name)
+        model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
+        model.save(model_file)
+
+    def __load_data(self, file_name: str):
+        x = np.loadtxt(file_name+'x', delimiter=",")
+        y = np.loadtxt(file_name+'y', delimiter=",")
+
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.2)
+
+        x_train = tf.convert_to_tensor(x_train)
+        x_test = tf.convert_to_tensor(x_test)
+        y_train = tf.convert_to_tensor(y_train)
+        y_test = tf.convert_to_tensor(y_test)
+
+        return x_train, y_train, x_test, y_test
+
+    def generate_data(self, file_name: str, iterations: int, discover: float, model = None):
         self.__states_data = {}
-        self.__play_games(iterations, discover)
+        self.__play_games(iterations, discover, model)
         self.__save_games(file_name, iterations)
         self.__states_data = {}
         
-    def __play_games(self, iterations: int, discover: float):
-        model = None # placeholder
+    def __play_games(self, iterations: int, discover: float, model = None):
         player = NNPlayer(model, discover)
         for i in range(iterations):
             print(f'Game {i}')
