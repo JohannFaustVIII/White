@@ -19,13 +19,13 @@ class Game:
     def play_game(self):
         is_first_player_move = True
         while not self.__map.is_end_of_game():
-            if not self.__map.is_continuous_move_possible():
-                is_first_player_move = not is_first_player_move
             move = self.__first_player.get_move(self.__map, True) if is_first_player_move else self.__second_player.get_move(self.__map, False)
             self.__map.make_move(move, is_first_player_move)
             if self.__register_moves:
                 state = self.__map.get_points(is_first_player_move)
                 self.__first_player_states.append(state) if is_first_player_move else self.__second_player_states.append(state)
+            if not self.__map.is_continuous_move_possible() and not self.__map.is_end_of_game():
+                is_first_player_move = not is_first_player_move
         self.is_game_finished = True
         self.decide_winner(is_first_player_move)
 
