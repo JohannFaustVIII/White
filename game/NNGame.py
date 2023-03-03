@@ -42,10 +42,10 @@ class NNGame:
         return x_train, y_train, x_test, y_test
 
     def generate_data(self, file_name: str, iterations: int, discover: float, model = None):
-        self.__states_data = {}
+        self.__states_data = StateData.load_states(file_name)
         self.__play_games(iterations, discover, model)
-        self.__save_games(file_name, iterations)
-        self.__states_data = {}
+        StateData.save_states(self.__states_data, file_name)
+        self.__states_data = StateData.load_states(file_name)
         
     def __play_games(self, iterations: int, discover: float, model = None):
         player = NNPlayer(model, discover)
@@ -55,15 +55,6 @@ class NNGame:
             game.play_game()
             self.__update_states(StateData.increase_wins, game.get_winner_states())
             self.__update_states(StateData.increase_loses, game.get_loser_states())
-
-    def __save_games(self, file_name: str, iterations: int):
-        print('Saving games')
-        with open(file_name+"x", "w") as filex:
-            with open(file_name+"y", "w") as filey:
-                for key, value in self.__states_data.items():
-                    filex.write(f"{','.join([c for c in key])}\n")
-                    filey.write(f"{value.get_win_percentage()}\n")
-        print('Done')
 
     def __update_states(self, increase, states : list[list[int]]) -> None:
         for state in states:
