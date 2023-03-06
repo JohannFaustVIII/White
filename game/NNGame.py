@@ -9,10 +9,10 @@ class NNGame:
     
     __states_data = {}
 
-    def train(self, file_name: str, iterations: int, discover : float, model_file: str):
+    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1):
         counter = 0
         model = self.__load_model(model_file)
-        while counter < 1:
+        while counter < loops:
             counter += 1
             print(f'Loop: {counter}')
             self.generate_data(file_name, iterations, discover, model)
