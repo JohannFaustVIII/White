@@ -45,7 +45,6 @@ class NNGame:
         self.__states_data = StateData.load_states(file_name)
         self.__play_games(iterations, discover, model)
         StateData.save_states(self.__states_data, file_name)
-        self.__states_data = StateData.load_states(file_name)
         
     def __play_games(self, iterations: int, discover: float, model = None):
         player = NNPlayer(model, discover)
