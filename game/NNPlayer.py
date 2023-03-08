@@ -26,6 +26,9 @@ class NNPlayer(Player):
             valued_moves = [predict_func(move) for move in moves]
             max_move = max(valued_moves, key=lambda x: x[1])
             move = max_move[0]
-        if self.verbose:
-            print(f"Chosen move is: {move}")
+        self.__print_move(move)
         return move
+    
+    def __print_move(self, move : int) :
+        if self.verbose:
+            print(f"\nNNPlayer chosen move is {move}\n")

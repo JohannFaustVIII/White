@@ -12,7 +12,7 @@ class ConsolePlayer(Player):
         possible_moves = map.get_possible_moves(first_player)
         print(self.name)
         while move not in possible_moves:
-            move = int(input(f"Possible moves: {possible_moves}\nPlease, enter a move: "))
+            move = int(input(f"\nPossible moves: {possible_moves}\nPlease, enter a move: "))
             if move not in possible_moves:
-                print("Provided move is not possible")
+                print("Provided move is not possible!!!")
         return move
