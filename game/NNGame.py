@@ -4,24 +4,26 @@ import sklearn.model_selection
 from Game import Game
 from NNPlayer import NNPlayer
 from StateData import StateData
+from multiprocessing import Queue
+from multiprocessing import Process
 
 class NNGame:
     
     __states_data = {}
+    __process_queue = Queue()
 
     def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False):
         counter = 0
-        model = self.__load_model(model_file)
         while counter < loops:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
             print(f'Loop: {counter}')
-            self.generate_data(loop_file_name, iterations, discover, model)
-            self.__train(model, loop_file_name, model_file)
+            self.generate_data(loop_file_name, iterations, discover, model_file, 8)
+            self.__train(loop_file_name, model_file)
 
     def __load_model(self, file: str):
         new_model = tf.keras.models.load_model(file)
-        new_model.summary()
+        # new_model.summary()
         return new_model
 
     def __get_progressive_file_name(progressive : bool, file_name : str, counter : int) :
@@ -30,7 +32,8 @@ class NNGame:
         else:
             return file_name
         
-    def __train(self, model, file_name: str, model_file: str):
+    def __train(self, file_name: str, model_file: str):
+        model = self.__load_model(model_file)
         X_train, y_train, X_valid, y_valid = self.__load_data(file_name)
         model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
         model.save(model_file)
@@ -61,27 +64,50 @@ class NNGame:
 
         return x_train, y_train, x_test, y_test
 
-    def generate_data(self, file_name: str, iterations: int, discover: float, model = None):
+    def generate_data(self, file_name: str, iterations: int, discover: float, model_file: str, processes : int = 1):
         if iterations > 0:
+            NNPlayer.clean_memory()
             self.__states_data = StateData.load_states(file_name)
-            self.__play_games(iterations, discover, model)
+            proc_list = []
+            for i in range(processes):
+                process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i)))
+                proc_list.append(process)
+                process.start()
+            # for p in proc_list:
+            #     print(f'Waiting, proc_list size = {len(proc_list)}')
+            #     p.join()
+            print('Joing states')
+            for i in range(processes):
+                states = self.__process_queue.get()
+                for key, value in states.items():
+                    if key not in self.__states_data:
+                        self.__states_data[key] = value
+                    else:
+                        self.__states_data[key].add(value)
+            print('Finished joining states')
             StateData.save_states(self.__states_data, file_name)
         
-    def __play_games(self, iterations: int, discover: float, model = None):
+    def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
+        model = self.__load_model(model_file)
+        states_data = {}
         player = NNPlayer(model, discover)
         for i in range(iterations):
-            print(f'Game {i}')
+            # if i % 100 == 0:
+            print(f'{name} Game {i}')
             game = Game(player, player, True)
             game.play_game()
-            self.__update_states(StateData.increase_wins, game.get_winner_states())
-            self.__update_states(StateData.increase_loses, game.get_loser_states())
+            self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
+            self.__update_states(states_data, StateData.increase_loses, game.get_loser_states())
+        print(f'{name} Finished playing games. Putting games into queue.')
+        self.__process_queue.put(states_data)
+        print(f'{name} Finished putting games into queue.')
 
-    def __update_states(self, increase, states : list[list[int]]) -> None:
+    def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
             state_name = StateData.state_to_string(state)
-            if state_name not in self.__states_data:
+            if state_name not in states_data:
                 state_to_update = StateData(state)
-                self.__states_data[state_name] = state_to_update
+                states_data[state_name] = state_to_update
             else:
-                state_to_update = self.__states_data[state_name]
+                state_to_update = states_data[state_name]
             increase(self=state_to_update)

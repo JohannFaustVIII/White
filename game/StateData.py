@@ -10,6 +10,10 @@ class StateData:
         self.__state = state
         pass
     
+    def add(self, state) -> None:
+        self.__loses = self.__loses + state.__loses
+        self.__wins = self.__wins + state.__wins
+
     def increase_loses(self) -> None:
         self.__loses = self.__loses + 1
     

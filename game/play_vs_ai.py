@@ -13,8 +13,8 @@ if __name__ == "__main__":
   model = tf.keras.models.load_model(model_file)
   model.summary()
 
-  first_player = ConsolePlayer(name = "First player") if is_first_player else NNPlayer(model, 0.0, verbose = True)
-  second_player = ConsolePlayer(name = "Second player") if not is_first_player else NNPlayer(model, 0.0, verbose = True)
+  first_player = ConsolePlayer(name = "First player") if is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
+  second_player = ConsolePlayer(name = "Second player") if not is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
 
   game = Game(first_player, second_player, False)
   game.play_game()

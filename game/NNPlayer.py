@@ -6,6 +6,8 @@ from Player import Player
 
 class NNPlayer(Player):
 
+    predict_memory = {}
+
     def __init__(self, model, discover : float, verbose : bool = False, extra_verbose : bool = False) -> None:
         super().__init__()
         self.model = model
@@ -13,13 +15,17 @@ class NNPlayer(Player):
         self.verbose = verbose
         self.extra_verbose = extra_verbose
 
-    def get_move(self, map : Map, first_player : bool) -> int:
+    def get_move(self, map : Map, first_player : bool, use_memory : bool = True) -> int:
         moves = map.get_possible_moves(first_player)
         if random.random() < self.discover:
             move = random.choice(moves)
         else:
             def predict_func(move):
-                value = self.model.predict([map.get_points_for_move(move, first_player)], verbose = 0)
+                state = map.get_points_for_move(move, first_player)
+                if use_memory:
+                    value = NNPlayer.predict(self.model, state)
+                else:
+                    value = self.model.predict([state], verbose = 0)
                 if self.extra_verbose:
                     print(f"Move {move} value = {value}")
                 return (move, value) 
@@ -32,3 +38,15 @@ class NNPlayer(Player):
     def __print_move(self, move : int) :
         if self.verbose:
             print(f"\nNNPlayer chosen move is {move}\n")
+
+    def clean_memory() :
+        NNPlayer.predict_memory = {}
+    
+    def predict(model, state : list[int]) -> int:
+        k = tuple(state)
+        if k not in NNPlayer.predict_memory:
+            value = model.predict([state], verbose = 0)
+            NNPlayer.predict_memory[k] = value
+            return value
+        else:
+            return NNPlayer.predict_memory[k]
