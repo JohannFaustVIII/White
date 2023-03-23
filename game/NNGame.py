@@ -89,8 +89,8 @@ class NNGame:
         states_data = {}
         player = NNPlayer(model, discover)
         for i in range(iterations):
-            # if i % 100 == 0:
-            print(f'{name} Game {i}')
+            if i % 100 == 0:
+                print(f'{name} Game {i}')
             game = Game(player, player, True)
             game.play_game()
             self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
