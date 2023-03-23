@@ -23,7 +23,6 @@ class NNGame:
 
     def __load_model(self, file: str):
         new_model = tf.keras.models.load_model(file)
-        # new_model.summary()
         return new_model
 
     def __get_progressive_file_name(progressive : bool, file_name : str, counter : int) :
@@ -38,17 +37,17 @@ class NNGame:
         model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
         model.save(model_file)
 
-    def __load_data(self, file_name: str, min_limit : float = 0.0, max_limit: float = 1.0):
+    def __load_data(self, file_name: str, min_limit : float = -1.0, max_limit: float = 1.0):
         x = np.loadtxt(file_name+'x', delimiter=",")
         y = np.loadtxt(file_name+'y', delimiter=",")
         
 
-        if min_limit > 0.0 or max_limit < 1.0:
+        if min_limit > -1.0 or max_limit < 1.0:
             x_f = []
             y_f = []
 
             for i in range(len(y)):
-                if y[i] > 0.3:
+                if min_limit <= y[i] <= max_limit:
                     x_f.append(x[i])
                     y_f.append(y[i])
             
@@ -73,10 +72,7 @@ class NNGame:
                 process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i)))
                 proc_list.append(process)
                 process.start()
-            # for p in proc_list:
-            #     print(f'Waiting, proc_list size = {len(proc_list)}')
-            #     p.join()
-            print('Joing states')
+            print('Joining states')
             for i in range(processes):
                 states = self.__process_queue.get()
                 for key, value in states.items():
@@ -84,6 +80,7 @@ class NNGame:
                         self.__states_data[key] = value
                     else:
                         self.__states_data[key].add(value)
+            
             print('Finished joining states')
             StateData.save_states(self.__states_data, file_name)
         

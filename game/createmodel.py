@@ -27,7 +27,7 @@ for layer in layers:
       model.add(Dense(int(layer), activation='relu', kernel_initializer = 'glorot_uniform', bias_initializer = Zeros()))
     model.add(BatchNormalization())
 
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(1, activation='tanh'))
 
 model.summary()
 

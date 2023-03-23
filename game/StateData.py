@@ -28,7 +28,8 @@ class StateData:
 
     def get_win_percentage(self) -> float:
         sum = self.__loses + self.__wins
-        return self.__wins/sum if sum != 0 else 0
+        value = self.__loses * (-1) + self.__wins * 1
+        return value/sum if sum != 0 else 0
 
     def get_state(self) -> list[int]:
         return self.__state
