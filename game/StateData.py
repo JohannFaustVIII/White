@@ -1,3 +1,4 @@
+import datetime
 from functools import reduce
 
 
@@ -52,6 +53,8 @@ class StateData:
 
     def load_states(file_name : str) -> dict:
         print("Loading data from a file.")
+        start = datetime.datetime.now().replace(microsecond=0)
+
         file_x_name = file_name + "x"
         file_loses_name = file_name + "loses"
         file_wins_name = file_name + "wins"
@@ -62,26 +65,28 @@ class StateData:
             with open(file_x_name) as file_x:
                 with open(file_loses_name) as file_loses:
                     with open(file_wins_name) as file_wins:
-                        lines_x = file_x.readlines()
-                        lines_loses = file_loses.readlines()
-                        lines_wins = file_wins.readlines()
+                        lines_x = file_x.readlines()[0:-1]
+                        lines_loses = file_loses.readlines()[0:-1]
+                        lines_wins = file_wins.readlines()[0:-1]
 
-                        for i in range(len(lines_x) - 1):
-                            vector = [int(c) for c in lines_x[i].strip().split(",")]
-                            loses = int(lines_loses[i].strip())
-                            wins = int(lines_wins[i].strip())
+                        vector_list = [[int(c) for c in x.strip().split(",")] for x in lines_x]
+                        loses_list = [int(lose.strip()) for lose in lines_loses]
+                        wins_list = [int(win.strip()) for win in lines_wins]
 
-                            state = StateData(vector)
-                            state.__loses = loses
-                            state.__wins = wins
+                        result = {StateData.state_to_string(vector_list[i]) : StateData.createStateData(vector_list[i], loses_list[i], wins_list[i]) for i in range(len(lines_x))}
 
-                            key = StateData.state_to_string(vector)
-
-                            result[key] = state
-                        
+                        #     result[key] = state
+                        end = datetime.datetime.now().replace(microsecond=0)
                         print("Loading finished succesfully.")
+                        print(f"Loading finished in {end-start}")
         except Exception as e:
             print("Exception occurred during loading data.")
             print(e)
         finally:
             return result
+        
+    def createStateData(vector, loses, wins):
+        state = StateData(vector)
+        state.__loses = loses
+        state.__wins = wins
+        return state

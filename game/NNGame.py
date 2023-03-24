@@ -1,3 +1,4 @@
+import datetime
 import tensorflow as tf
 import numpy as np
 import sklearn.model_selection
@@ -32,10 +33,20 @@ class NNGame:
             return file_name
         
     def __train(self, file_name: str, model_file: str):
-        model = self.__load_model(model_file)
-        X_train, y_train, X_valid, y_valid = self.__load_data(file_name)
-        model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
-        model.save(model_file)
+
+        def internal_training():
+            model = self.__load_model(model_file)
+            X_train, y_train, X_valid, y_valid = self.__load_data(file_name)
+            model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
+            model.save(model_file)
+        
+        print('Starting training session.')
+        start = datetime.datetime.now().replace(microsecond=0)
+        proc = Process(target=internal_training)
+        proc.start()
+        proc.join()
+        end = datetime.datetime.now().replace(microsecond=0)
+        print(f"Training session finished in {end-start}")
 
     def __load_data(self, file_name: str, min_limit : float = -1.0, max_limit: float = 1.0):
         x = np.loadtxt(file_name+'x', delimiter=",")
@@ -64,6 +75,8 @@ class NNGame:
         return x_train, y_train, x_test, y_test
 
     def generate_data(self, file_name: str, iterations: int, discover: float, model_file: str, processes : int = 1):
+        print("Starting generating games")
+        start = datetime.datetime.now().replace(microsecond=0)
         if iterations > 0:
             NNPlayer.clean_memory()
             self.__states_data = StateData.load_states(file_name)
@@ -80,9 +93,14 @@ class NNGame:
                         self.__states_data[key] = value
                     else:
                         self.__states_data[key].add(value)
-            
             print('Finished joining states')
+            print('Joining processes')
+            for p in proc_list:
+                p.join()
+            print('Finished joining processes')
             StateData.save_states(self.__states_data, file_name)
+        end = datetime.datetime.now().replace(microsecond=0)
+        print(f"Generating games finished in {end-start}")
         
     def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
         model = self.__load_model(model_file)
