@@ -13,14 +13,16 @@ class NNGame:
     __states_data = {}
     __process_queue = Queue()
 
-    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False):
+    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0):
         counter = 0
         while counter < loops:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
-            print(f'Loop: {counter}')
+            print(f'Loop: {counter}, discover = {discover}')
             self.generate_data(loop_file_name, iterations, discover, model_file, 8)
             self.__train(loop_file_name, model_file)
+            if progressive:
+                discover = max(0.01, discover - discover_degradation)
 
     def __load_model(self, file: str):
         new_model = tf.keras.models.load_model(file)
