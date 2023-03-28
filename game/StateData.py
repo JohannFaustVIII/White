@@ -1,4 +1,3 @@
-import datetime
 from functools import reduce
 
 
@@ -52,8 +51,6 @@ class StateData:
         print('Done')
 
     def load_states(file_name : str) -> dict:
-        print("Loading data from a file.")
-        start = datetime.datetime.now().replace(microsecond=0)
 
         file_x_name = file_name + "x"
         file_loses_name = file_name + "loses"
@@ -76,9 +73,7 @@ class StateData:
                         result = {StateData.state_to_string(vector_list[i]) : StateData.createStateData(vector_list[i], loses_list[i], wins_list[i]) for i in range(len(lines_x))}
 
                         #     result[key] = state
-                        end = datetime.datetime.now().replace(microsecond=0)
                         print("Loading finished succesfully.")
-                        print(f"Loading finished in {end-start}")
         except Exception as e:
             print("Exception occurred during loading data.")
             print(e)
