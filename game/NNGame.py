@@ -49,6 +49,18 @@ class NNGame:
         y = np.loadtxt(file_name+'y', delimiter=",")
         
 
+        x, y = NNGame.__filter_by_limits(x, y, min_limit, max_limit)
+
+        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.2)
+
+        x_train = tf.convert_to_tensor(x_train)
+        x_test = tf.convert_to_tensor(x_test)
+        y_train = tf.convert_to_tensor(y_train)
+        y_test = tf.convert_to_tensor(y_test)
+
+        return x_train, y_train, x_test, y_test
+    
+    def __filter_by_limits(x, y, min_limit : float, max_limit: float):
         if min_limit > -1.0 or max_limit < 1.0:
             x_f = []
             y_f = []
@@ -61,38 +73,41 @@ class NNGame:
             x = np.array(x_f)
             y = np.array(y_f)
 
-        x_train, x_test, y_train, y_test = sklearn.model_selection.train_test_split(x, y, test_size=0.2)
-
-        x_train = tf.convert_to_tensor(x_train)
-        x_test = tf.convert_to_tensor(x_test)
-        y_train = tf.convert_to_tensor(y_train)
-        y_test = tf.convert_to_tensor(y_test)
-
-        return x_train, y_train, x_test, y_test
+        return (x, y)
 
     def generate_data(self, file_name: str, iterations: int, discover: float, model_file: str, processes : int = 1):
         if iterations > 0:
             NNPlayer.clean_memory()
             self.__states_data = measure_time("loading states from file", lambda : StateData.load_states(file_name))
-            proc_list = []
-            for i in range(processes):
-                process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i)))
-                proc_list.append(process)
-                process.start()
-            print('Joining states')
-            for i in range(processes):
-                states = self.__process_queue.get()
-                for key, value in states.items():
-                    if key not in self.__states_data:
-                        self.__states_data[key] = value
-                    else:
-                        self.__states_data[key].add(value)
-            print('Finished joining states')
-            print('Joining processes')
-            for p in proc_list:
-                p.join()
-            print('Finished joining processes')
+            proc_list = self.__spawn_playing_processes(iterations, discover, model_file, processes)
+            self.__read_states_from_processes(proc_list)
+            self.__join_processes(proc_list)
             StateData.save_states(self.__states_data, file_name)
+        
+    def __spawn_playing_processes(self, iterations: int, discover: float, model_file: str, processes : int):
+        proc_list = []
+        for i in range(processes):
+            process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i)))
+            proc_list.append(process)
+            process.start()
+        return proc_list
+    
+    def __read_states_from_processes(self, processes_list):
+        print('Joining states')
+        for _ in processes_list:
+            states = self.__process_queue.get()
+            for key, value in states.items():
+                if key not in self.__states_data:
+                    self.__states_data[key] = value
+                else:
+                    self.__states_data[key].add(value)
+        print('Finished joining states')
+
+    def __join_processes(self, processes_list):
+        print('Joining processes')
+        for p in processes_list:
+            p.join()
+        print('Finished joining processes')
         
     def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
         model = self.__load_model(model_file)
@@ -100,8 +115,7 @@ class NNGame:
         player = NNPlayer(model, discover)
 
         for i in range(iterations):
-            if i % 100 == 0:
-                print(f'{name} Game {i}')
+            self.__print_game_number(name, i)
             game = Game(player, player, True)
             game.play_game()
             self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
@@ -114,6 +128,10 @@ class NNGame:
     def __load_model(self, file: str):
         new_model = tf.keras.models.load_model(file)
         return new_model
+
+    def __print_game_number(self, name: str, number: int):
+        if number % 1 == 0:
+            print(f'{name} Game {number}')
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
