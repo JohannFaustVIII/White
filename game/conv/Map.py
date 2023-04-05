@@ -10,9 +10,20 @@ class Map:
         self.__position_x = int(width/2)
         self.__position_y = int(height/2)
         self.__points = Map.__generate_points(width, height)
-
-    def get_points(self):
-        return self.__points
+    
+    def get_points(self, first_player) -> list[list[list[int]]]:
+        if first_player:
+            result = [point.get_as_conv() for point in self.__points]
+        else:
+            result = [Map.__reverse_point(point.get_as_conv()) for point in self.__points]
+            result.reverse()
+        return result
+    
+    def __reverse_point(point : list[list[int, int]]):
+        for p in point:
+            p.reverse()
+        point.reverse()
+        return point
 
     def make_move(self, move : int, first_player : bool = True) -> None:
         if not first_player:
