@@ -56,6 +56,27 @@ class Map:
         elif move in down_moves:
             self.__position_y += 1
 
+    def is_end_of_game(self) -> bool:
+        return self.is_goal(True) or self.is_goal(False) or not self.get_possible_moves()
+    
+    def get_possible_moves(self, is_first_player: bool = True) -> list[int]:
+        possible = [x for x in range(0, 8) if self.is_move_possible(x)]
+        if not is_first_player:
+            possible = [Map.__second_player_moves[move] for move in possible]
+            possible.sort()
+        return possible
+
+    def is_move_possible(self, move : int) -> bool:
+        if self.__position_y == -1 or self.__position_y == self.__height + 1 :
+            return True
+        return not self.__points[self.__get_current_point_index()].get_move(move)
+
+    def is_goal(self, first_player : bool) -> bool:
+        if first_player:
+            return self.__position_y == -1
+        else:
+            return self.__position_y == self.__height + 1
+        
     def __generate_points(width : int, height : int) -> list[Point]:
         points = []
 
