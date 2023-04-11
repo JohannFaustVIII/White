@@ -25,12 +25,25 @@ class Map:
         point.reverse()
         return point
 
+    def get_points_for_move(self, move : int, first_player : bool) -> list[list[list[int]]]:
+        self.make_move(move, first_player)
+        result = self.get_points(first_player)
+        self.revert_move(move, first_player)
+        return result
+
     def make_move(self, move : int, first_player : bool = True) -> None:
         if not first_player:
             move = Map.__second_player_moves[move]
         self.__update_point(move, True)
         self.__make_move(move)
         self.__update_point((move + 4) % 8, True)
+
+    def revert_move(self, move : int, first_player : bool) -> None:
+        if not first_player:
+            move = Map.__second_player_moves[move]
+        self.__update_point((move + 4) % 8, False)
+        self.__make_move((move + 4) % 8)
+        self.__update_point(move, False)
 
     def __update_point(self, move : int, value : bool) -> None:
         index = self.__get_current_point_index()
@@ -70,6 +83,14 @@ class Map:
         if self.__position_y == -1 or self.__position_y == self.__height + 1 :
             return True
         return not self.__points[self.__get_current_point_index()].get_move(move)
+
+    def is_continuous_move_possible(self) -> bool:
+        if self.__position_y in [-1, self.__height + 1]:
+            return False
+        point = self.__points[self.__get_current_point_index()]
+        counter = sum(point.lines)
+
+        return counter > 1
 
     def is_goal(self, first_player : bool) -> bool:
         if first_player:
