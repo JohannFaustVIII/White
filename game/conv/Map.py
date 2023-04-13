@@ -12,10 +12,10 @@ class Map:
         self.__points = Map.__generate_points(width, height)
     
     def get_points(self, first_player) -> list[list[list[int]]]:
-        if first_player:
-            result = [point.get_as_conv() for point in self.__points]
-        else:
-            result = [Map.__reverse_point(point.get_as_conv()) for point in self.__points]
+        result = [point.get_as_conv() for point in self.__points]
+        result[self.__get_current_point_index()][1][1] = 1
+        if not first_player:
+            result = [Map.__reverse_point(point) for point in result]
             result.reverse()
         return result
     
