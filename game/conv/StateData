@@ -30,14 +30,14 @@ class StateData:
         value = self.__loses * (-1) + self.__wins * 1
         return value/sum if sum != 0 else 0
 
-    def state_to_string(state : list[list[list[int]]]) -> str:
+    def state_to_string(state : list[list[int]]) -> str:
         flat_list = list(np.concatenate(state).flat)
         return reduce(lambda x, y: str(x) + str(y), flat_list)
     
-    def string_to_state(state: str) -> list[list[list[int]]]:
+    def string_to_state(state: str, map_width: int) -> list[list[int]]:
+        line_length = (map_width + 1) * 3
         flat_list = [int(c) for c in state]
-        points = [flat_list[x:x+9] for x in range(0, len(state), 9)]
-        points = [[point[x:x+3] for x in range(0, len(point), 3)] for point in points]
+        points = [flat_list[x:x+line_length] for x in range(0, len(state), line_length)]
         return points
     
     def save_states(states : dict, file_name : str) -> None:

@@ -11,21 +11,32 @@ class Map:
         self.__position_y = int(height/2)
         self.__points = Map.__generate_points(width, height)
     
-    def get_points(self, first_player) -> list[list[list[int]]]:
+    def get_points(self, first_player) -> list[list[int]]:
         result = [point.get_as_conv() for point in self.__points]
         result[self.__get_current_point_index()][1][1] = 1
-        if not first_player:
-            result = [Map.__reverse_point(point) for point in result]
-            result.reverse()
-        return result
-    
-    def __reverse_point(point : list[list[int, int]]):
-        for p in point:
-            p.reverse()
-        point.reverse()
-        return point
+        line_map = []
+        for x in range(0, len(result), self.__width + 1):
+            top = []
+            middle = []
+            bottom = []
 
-    def get_points_for_move(self, move : int, first_player : bool) -> list[list[list[int]]]:
+            for p in result[x:x + (self.__width + 1)]:
+                top.extend(p[0])
+                middle.extend(p[1])
+                bottom.extend(p[2])
+
+            line_map.append(top)
+            line_map.append(middle)
+            line_map.append(bottom)
+
+        if not first_player:
+            for p in line_map:
+                p.reverse()
+            line_map.reverse()
+
+        return line_map
+
+    def get_points_for_move(self, move : int, first_player : bool) -> list[list[int]]:
         self.make_move(move, first_player)
         result = self.get_points(first_player)
         self.revert_move(move, first_player)
