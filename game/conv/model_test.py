@@ -4,7 +4,6 @@ from tensorflow.keras.layers import Dense, Dropout
 from tensorflow.keras.layers import BatchNormalization
 from tensorflow.keras.layers import Conv2D, MaxPooling2D
 from tensorflow.keras.layers import Flatten
-from tensorflow.keras.initializers import Zeros
 import sys
 from Map import Map
 
@@ -24,9 +23,4 @@ model.summary()
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-map = Map(8, 10)
-
-print(len(map.get_points(True)))
-
-value = model.predict([map.get_points(False)])
-print(value)
+model.save('saved_model/conva_1')
