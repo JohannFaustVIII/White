@@ -13,14 +13,14 @@ class NNGame:
     __states_data = {}
     __process_queue = Queue()
 
-    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1):
+    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100):
         counter = 0
         while counter < loops:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
             print(f'Loop: {counter}, discover = {discover}')
             measure_time("generating games", lambda : self.generate_data(loop_file_name, iterations, discover, model_file, processes_to_spawn))
-            measure_time("training session", lambda : self.__train(loop_file_name, model_file))
+            measure_time("training session", lambda : self.__train(loop_file_name, model_file, epochs))
             discover = NNGame.__get_progressive_discovery(discover, discover_degradation)
 
     def __get_progressive_file_name(progressive : bool, file_name : str, counter : int) :
@@ -32,12 +32,12 @@ class NNGame:
     def __get_progressive_discovery(actual_discovery: float, degradation: float) -> float:
         return max(0.01, actual_discovery - degradation)
 
-    def __train(self, file_name: str, model_file: str):
+    def __train(self, file_name: str, model_file: str, ep : int):
 
         def internal_training():
             model = self.__load_model(model_file)
             X_train, y_train, X_valid, y_valid = self.__load_data(file_name)
-            model.fit(X_train, y_train, batch_size = 128, epochs = 20, verbose = 1, validation_data=(X_valid, y_valid))
+            model.fit(X_train, y_train, batch_size = 128, epochs = ep, verbose = 1, validation_data=(X_valid, y_valid))
             model.save(model_file)
         
         proc = Process(target=internal_training)
