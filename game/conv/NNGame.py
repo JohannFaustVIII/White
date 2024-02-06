@@ -132,7 +132,7 @@ class NNGame:
 
     def __print_game_number(self, name: str, number: int):
         if number % 1 == 0:
-            print(f'{name} Game {number}')
+            print(f'Process={name}: Game number:{number}')
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
