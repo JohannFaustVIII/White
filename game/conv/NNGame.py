@@ -13,13 +13,13 @@ class NNGame:
     __states_data = {}
     __process_queue = Queue()
 
-    def train(self, file_name: str, iterations: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100):
+    def train(self, file_name: str, games_per_process: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100):
         counter = 0
         while counter < loops:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
             print(f'Loop: {counter}, discover = {discover}')
-            measure_time("generating games", lambda : self.generate_data(loop_file_name, iterations, discover, model_file, processes_to_spawn))
+            measure_time("generating games", lambda : self.generate_data(loop_file_name, games_per_process, discover, model_file, processes_to_spawn))
             measure_time("training session", lambda : self.__train(loop_file_name, model_file, epochs))
             discover = NNGame.__get_progressive_discovery(discover, discover_degradation)
 
