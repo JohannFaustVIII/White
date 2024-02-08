@@ -15,6 +15,8 @@ class NNGame:
 
     def train(self, file_name: str, games_per_process: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100):
         counter = 0
+        NNGame.__show_model_summary(model_file)
+
         while counter < loops:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
@@ -22,6 +24,14 @@ class NNGame:
             measure_time("generating games", lambda : self.generate_data(loop_file_name, games_per_process, discover, model_file, processes_to_spawn))
             measure_time("training session", lambda : self.__train(loop_file_name, model_file, epochs))
             discover = NNGame.__get_progressive_discovery(discover, discover_degradation)
+
+    def __show_model_summary(model_file : str):
+        # TODO: code below blocks model for other processes
+        # new_model = tf.keras.models.load_model(model_file)
+        # print('--- Model summary ---')
+        # new_model.summary()
+        # print('-'*20)
+        pass
 
     def __get_progressive_file_name(progressive : bool, file_name : str, counter : int) :
         if progressive:
