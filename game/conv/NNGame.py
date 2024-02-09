@@ -26,12 +26,16 @@ class NNGame:
             discover = NNGame.__get_progressive_discovery(discover, discover_degradation)
 
     def __show_model_summary(model_file : str):
-        # TODO: code below blocks model for other processes
-        # new_model = tf.keras.models.load_model(model_file)
-        # print('--- Model summary ---')
-        # new_model.summary()
-        # print('-'*20)
-        pass
+        
+        def internal_print():
+            model = tf.keras.models.load_model(model_file)
+            print('-'*10 + 'Model summary' + '-'*10)
+            model.summary()
+            print('-'*30)
+
+        proc = Process(target=internal_print)
+        proc.start()
+        proc.join()
 
     def __get_progressive_file_name(progressive : bool, file_name : str, counter : int) :
         if progressive:
