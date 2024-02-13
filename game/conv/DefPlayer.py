@@ -34,6 +34,18 @@ class DefPlayer(Player):
          else:
             _d = depth
             _f = first_player
+
+            while map.is_continuous_move_possible():
+               # and here should be the loop to go as deep as possible
+               # after reaching "the end" - move not possible or end of game
+               # it should be evaluated
+               #  - if end of game, it is pretty easy
+               #  - if enemy's move, THEN should be the method called for the player
+               # after that, move one step backward, and check other options
+               # repeat the process of reaching "the end" and evaluation
+               # DFS with extra steps 
+               pass
+
             if not map.is_continuous_move_possible():
                _d -= 1
                _f = not first_player
