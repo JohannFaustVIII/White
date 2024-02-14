@@ -17,53 +17,41 @@ class DefPlayer(Player):
 
       # TODO: it lacks alpha-beta optimization, it requires alpha and beta levels, to drop further checks if not possible to pick
 
-      compare_function = max if (depth - _d) % 2 == 0 else min # we want to maximize, when the enemy wants to minimize
+      compare_function = max if (self.__depth - depth) % 2 == 0 else min # we want to maximize, when the enemy wants to minimize
       final_moves = []
-      final_result = -10**7 if (depth - _d) % 2 == 0 else 10**7 
+      final_result = -10**7 if (self.__depth - depth) % 2 == 0 else 10**7 
 
+      moves = [map.get_possible_moves(first_player)]
+      indexes = [0]
 
-      for k in map.get_possible_moves(first_player):
+      while moves:
+
+         index = indexes[-1]
+
+         map.make_move(moves[-1][index], first_player)
+
+         if map.is_continuous_move_possible():
+            moves.append(map.get_possible_moves(first_player))
+            indexes = [0]
+            continue
          
-         map.make_move(k, first_player)
-
-         # compute how good the move is
-
-         if map.is_end_of_game():
-            # check who win, as it may be the best/worst option
-            pass
+         # evaluate position, but what if depth is 0?
+         if depth > 1:
+            _res = self.compute_moves(map, not first_player, depth - 1)
          else:
-            _d = depth
-            _f = first_player
+            # this requires to analyze the situation on the map
+            # and save it in an variable
+            pass
+         map.revert_move(moves[-1][index], first_player)
 
-            while map.is_continuous_move_possible():
-               # and here should be the loop to go as deep as possible
-               # after reaching "the end" - move not possible or end of game
-               # it should be evaluated
-               #  - if end of game, it is pretty easy
-               #  - if enemy's move, THEN should be the method called for the player
-               # after that, move one step backward, and check other options
-               # repeat the process of reaching "the end" and evaluation
-               # DFS with extra steps 
-               pass
-
-            if not map.is_continuous_move_possible():
-               _d -= 1
-               _f = not first_player
+         indexes[-1] += 1
+         while indexes and moves and indexes[-1] >= len(moves[-1]):
+            indexes.pop()
+            moves.pop()
             
-            if _d == 0:
-               # compute how good the current state is for us
-               pass
-            else:
-               # and below is a problem, because of possible method call limit
-               _res = self.compute_moves(map, _f, _d) # the result should be saved, it will be moves + value
-               # and then, it will be k + _res and compare with other options?
-
-
-         map.revert_move(k, first_player)
-
+            map.revert_move(moves[-1][indexes[-1]], first_player)
+            indexes[-1] += 1
 
       # return the best, currently saved option
-
-
 
       pass
