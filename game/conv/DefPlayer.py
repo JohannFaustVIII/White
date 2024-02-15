@@ -9,9 +9,9 @@ class DefPlayer(Player):
       self.__depth = depth
 
    def get_moves(self, map : Map, first_player : bool) -> list[int]:
-      computed_moves = self.compute_moves(map, first_player, self.__depth)
+      computed_moves, _ = self.compute_moves(map, first_player, self.__depth)
 
-      pass
+      return computed_moves
 
    def compute_moves(self, map, first_player, depth):
 
@@ -30,18 +30,35 @@ class DefPlayer(Player):
 
          map.make_move(moves[-1][index], first_player)
 
-         if map.is_continuous_move_possible():
+         if map.is_end_of_game():
+            if map.is_goal(first_player):
+               move_value = 10**3 if (self.__depth - depth) % 2 == 0 else -10**3
+            else:
+               move_value = -10**3 if (self.__depth - depth) % 2 == 0 else 10**3
+            final_result = compare_function(final_result, move_value)
+            if move_value == final_result:
+               moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+               final_moves = moves
+         elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes = [0]
             continue
-         
-         # evaluate position, but what if depth is 0?
-         if depth > 1:
-            _res = self.compute_moves(map, not first_player, depth - 1)
-         else:
-            # this requires to analyze the situation on the map
-            # and save it in an variable
+         elif depth <= 1:
+            # TODO: compute the distance
+            side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
+
+            result = 10
+            final_result = compare_function(final_result, result)
+            if result == final_result:
+               moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+               final_moves = moves
             pass
+         else:
+            _, result = self.compute_moves(map, not first_player, depth - 1)
+            final_result = compare_function(final_result, move_value)
+            if move_value == final_result:
+               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+
          map.revert_move(moves[-1][index], first_player)
 
          indexes[-1] += 1
@@ -54,4 +71,4 @@ class DefPlayer(Player):
 
       # return the best, currently saved option
 
-      pass
+      return final_moves, final_result
