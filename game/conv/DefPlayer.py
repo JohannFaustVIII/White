@@ -41,13 +41,41 @@ class DefPlayer(Player):
                final_moves = moves
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
-            indexes = [0]
+            indexes.append(0)
             continue
          elif depth <= 1:
-            # TODO: compute the distance
             side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
+            _c_moves = [map.get_possible_moves(side_to_compute)]
+            _c_indexes = [0]
+            _res = -10**5
 
-            result = 10
+            while _c_moves:
+               _c_index = _c_indexes[-1]
+
+               map.make_move(_c_moves[-1][_c_index], side_to_compute)
+
+               if map.is_end_of_game():
+                  if map.is_goal(not side_to_compute):
+                     _res = -1 * len(_c_indexes)
+               else:
+                  if (len(_c_moves) + 1) < (-1 * _res):
+                     _c_moves.append(map.get_possible_moves(side_to_compute))
+                     _c_indexes.append(0)
+                     continue
+
+               map.revert_move(_c_moves[-1][_c_index], side_to_compute)
+
+               _c_indexes[-1] += 1
+               
+               while _c_indexes and _c_moves and _c_indexes[-1] >= len(_c_moves[-1]):
+                  _c_indexes.pop()
+                  _c_moves.pop()
+
+                  map.revert_move(moves[-1][indexes[-1]], side_to_compute)
+
+                  _c_indexes[-1] += 1
+
+            result = _res
             final_result = compare_function(final_result, result)
             if result == final_result:
                moves = [moves[i][indexes[i]] for i in range(len(indexes))]
