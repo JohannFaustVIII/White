@@ -13,7 +13,7 @@ class DefPlayer(Player):
 
       return computed_moves
 
-   def compute_moves(self, map, first_player, depth):
+   def compute_moves(self, map, first_player, depth, alpha : int = -10**7, beta : int = 10**7):
 
       # TODO: it lacks alpha-beta optimization, it requires alpha and beta levels, to drop further checks if not possible to pick
 
@@ -82,7 +82,29 @@ class DefPlayer(Player):
                final_moves = moves
             pass
          else:
-            _, result = self.compute_moves(map, not first_player, depth - 1)
+            _, result = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
+
+            if (self.__depth - depth) % 2 == 0:
+               if result > beta:
+                  while moves:
+                     _ei = indexes[-1]
+                     _em = moves[-1][_ei]
+                     map.revert_move(_em, first_player)
+                     indexes.pop()
+                     moves.pop()
+                  return final_moves, final_result
+               alpha = max(alpha, result)
+            else:
+               if result < alpha:
+                  while moves:
+                     _ei = indexes[-1]
+                     _em = moves[-1][_ei]
+                     map.revert_move(_em, first_player)
+                     indexes.pop()
+                     moves.pop()
+                  return final_moves, final_result
+               beta = min(beta, result)    
+
             final_result = compare_function(final_result, move_value)
             if move_value == final_result:
                final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
