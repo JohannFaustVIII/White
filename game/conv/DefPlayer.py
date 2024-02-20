@@ -4,12 +4,16 @@ from Player import Player
 # alpha-beta algorithm, an oponnent for NN to learn at the begin
 class DefPlayer(Player):
 
-   def __init__(self, depth : int = 1) -> None:
+   def __init__(self, depth : int = 1, verbose : bool = False) -> None:
       super().__init__()
       self.__depth = depth
+      self.__verbose = verbose
 
-   def get_moves(self, map : Map, first_player : bool) -> list[int]:
+   def get_move(self, map : Map, first_player : bool) -> list[int]:
       computed_moves, _ = self.compute_moves(map, first_player, self.__depth)
+
+      if self.__verbose:
+         print(f'Def player moves = {computed_moves}')
 
       return computed_moves
 
@@ -40,6 +44,7 @@ class DefPlayer(Player):
                moves = [moves[i][indexes[i]] for i in range(len(indexes))]
                final_moves = moves
          elif map.is_continuous_move_possible():
+            print('Go further?')
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
             continue
@@ -50,6 +55,7 @@ class DefPlayer(Player):
             _res = -10**5
 
             while _c_moves:
+               ## TODO: REFACTOR IT, it is the worst way to test distance to the gate, it needs to be checked by point, not by path
                _c_index = _c_indexes[-1]
 
                map.make_move(_c_moves[-1][_c_index], side_to_compute)
@@ -71,7 +77,7 @@ class DefPlayer(Player):
                   _c_indexes.pop()
                   _c_moves.pop()
 
-                  map.revert_move(moves[-1][indexes[-1]], side_to_compute)
+                  map.revert_move(_c_moves[-1][_c_indexes[-1]], side_to_compute)
 
                   _c_indexes[-1] += 1
 

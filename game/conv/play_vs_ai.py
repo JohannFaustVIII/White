@@ -1,20 +1,31 @@
 if __name__ == "__main__":
   import sys
-  import tensorflow as tf
-
   from ConsolePlayer import ConsolePlayer 
-  from NNPlayer import NNPlayer
   from Game import Game
 
-  is_first_player = sys.argv[1] == "1"
-  model_file = sys.argv[2]
+  side = sys.argv[1]
+  if side[0] == 'd':
+    from DefPlayer import DefPlayer
+
+    side = side[1:]
+    is_first_player = side == "1"
+
+    first_player = ConsolePlayer(name = "First player") if is_first_player else DefPlayer(depth = 1)
+    second_player = ConsolePlayer(name = "Second player") if not is_first_player else DefPlayer(depth = 1)
+  
+  else:
+    is_first_player = side == "1"
+    model_file = sys.argv[2]
 
 
-  model = tf.keras.models.load_model(model_file)
-  model.summary()
+    import tensorflow as tf
+    from NNPlayer import NNPlayer
 
-  first_player = ConsolePlayer(name = "First player") if is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
-  second_player = ConsolePlayer(name = "Second player") if not is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
+    model = tf.keras.models.load_model(model_file)
+    model.summary()
+
+    first_player = ConsolePlayer(name = "First player") if is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
+    second_player = ConsolePlayer(name = "Second player") if not is_first_player else NNPlayer(model, 0.0, verbose = True, extra_verbose = True)
 
   game = Game(first_player, second_player, False)
   game.play_game()

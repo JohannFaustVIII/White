@@ -20,7 +20,19 @@ class Game:
         is_first_player_move = True
         while not self.__map.is_end_of_game():
             move = self.__first_player.get_move(self.__map, True) if is_first_player_move else self.__second_player.get_move(self.__map, False)
-            self.__map.make_move(move, is_first_player_move)
+            if move.__class__ == list:
+                self.__map.make_move(move[0], is_first_player_move)
+                move.pop(0)
+                while self.__map.is_continuous_move_possible() and move:
+                    self.__map.make_move(move[0], is_first_player_move)
+                    move.pop(0)
+                if self.__map.is_continuous_move_possible():
+                    print(f'Not enough moves generated')
+                if move:
+                    print(f'Moves not made: {move}')
+                pass
+            else:
+                self.__map.make_move(move, is_first_player_move)
             if self.__register_moves:
                 state = self.__map.get_points(is_first_player_move)
                 self.__first_player_states.append(state) if is_first_player_move else self.__second_player_states.append(state)
