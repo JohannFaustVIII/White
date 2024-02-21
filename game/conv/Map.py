@@ -237,3 +237,5 @@ class Map:
 
         return points
     
+    def get_position(self) -> tuple[int, int]:
+        return (self.__position_x, self.__position_y)

@@ -44,7 +44,6 @@ class DefPlayer(Player):
                moves = [moves[i][indexes[i]] for i in range(len(indexes))]
                final_moves = moves
          elif map.is_continuous_move_possible():
-            print('Go further?')
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
             continue
@@ -52,6 +51,7 @@ class DefPlayer(Player):
             side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
             _c_moves = [map.get_possible_moves(side_to_compute)]
             _c_indexes = [0]
+            _distances = {}
             _res = -10**5
 
             while _c_moves:
@@ -62,9 +62,11 @@ class DefPlayer(Player):
 
                if map.is_end_of_game():
                   if map.is_goal(not side_to_compute):
-                     _res = -1 * len(_c_indexes)
+                     _res = max(_res, -1 * len(_c_indexes))
                else:
-                  if (len(_c_moves) + 1) < (-1 * _res):
+                  pos = map.get_position()
+                  if pos not in _distances or _distances[pos] > len(_c_indexes):
+                     _distances[pos] = len(_c_indexes)
                      _c_moves.append(map.get_possible_moves(side_to_compute))
                      _c_indexes.append(0)
                      continue
@@ -77,15 +79,15 @@ class DefPlayer(Player):
                   _c_indexes.pop()
                   _c_moves.pop()
 
-                  map.revert_move(_c_moves[-1][_c_indexes[-1]], side_to_compute)
+                  if _c_indexes and _c_moves:
+                     map.revert_move(_c_moves[-1][_c_indexes[-1]], side_to_compute)
 
-                  _c_indexes[-1] += 1
+                     _c_indexes[-1] += 1
 
             result = _res
             final_result = compare_function(final_result, result)
             if result == final_result:
-               moves = [moves[i][indexes[i]] for i in range(len(indexes))]
-               final_moves = moves
+               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
             pass
          else:
             _, result = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
@@ -111,8 +113,8 @@ class DefPlayer(Player):
                   return final_moves, final_result
                beta = min(beta, result)    
 
-            final_result = compare_function(final_result, move_value)
-            if move_value == final_result:
+            final_result = compare_function(final_result, result)
+            if result == final_result:
                final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
 
          map.revert_move(moves[-1][index], first_player)
@@ -122,8 +124,9 @@ class DefPlayer(Player):
             indexes.pop()
             moves.pop()
             
-            map.revert_move(moves[-1][indexes[-1]], first_player)
-            indexes[-1] += 1
+            if indexes and moves:
+               map.revert_move(moves[-1][indexes[-1]], first_player)
+               indexes[-1] += 1
 
       # return the best, currently saved option
 

@@ -10,8 +10,8 @@ if __name__ == "__main__":
     side = side[1:]
     is_first_player = side == "1"
 
-    first_player = ConsolePlayer(name = "First player") if is_first_player else DefPlayer(depth = 1)
-    second_player = ConsolePlayer(name = "Second player") if not is_first_player else DefPlayer(depth = 1)
+    first_player = ConsolePlayer(name = "First player") if is_first_player else DefPlayer(depth = 3, verbose = True)
+    second_player = ConsolePlayer(name = "Second player") if not is_first_player else DefPlayer(depth = 3, verbose = True)
   
   else:
     is_first_player = side == "1"
