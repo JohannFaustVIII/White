@@ -61,8 +61,11 @@ class Map:
         point = self.__points[index]
         point.do_move(move, value)
 
+    def __compute_point_index(self, y, x) -> int:
+        return (y + 1) * (self.__width + 1) + x
+
     def __get_current_point_index(self) -> int:
-        return (self.__position_y + 1) * (self.__width + 1) + self.__position_x
+        return self.__compute_point_index(self.__position_y, self.__position_x)
 
     def __make_move(self, move : int) -> None:
         left_moves = [1, 2, 3]
@@ -239,3 +242,38 @@ class Map:
     
     def get_position(self) -> tuple[int, int]:
         return (self.__position_x, self.__position_y)
+    
+    def get_distance_map(self):
+        
+        start = self.get_position()
+        res = {start: 0}
+        next = [(self.get_position(), 0)]
+
+        vectors = ((-1, -1, 7), (-1, 0, 0), (-1, 1, 1), (0, -1, 6), (0, 1, 2), (1, -1, 5), (1, 0, 4), (1, 1, 3))
+
+        while next:
+            point = next.pop(0)
+            p = point[0]
+            x = p[0]
+            y = p[1]
+            distance = 0
+
+            if y == -1 or y == self.__height + 1:
+                continue
+
+            for v in vectors:
+                v_x = v[1] + x
+                v_y = v[0] + y
+                move = v[2]
+                v_d = distance + 1
+
+                if not self.__points[self.__compute_point_index(v_y, v_x)].get_move(move):
+
+                    if (v_x, v_y) not in res:
+                        _vp = (v_x, v_y)
+                        res[_vp] = v_d
+                        next.append((_vp, v_d))
+        
+        return res
+                
+

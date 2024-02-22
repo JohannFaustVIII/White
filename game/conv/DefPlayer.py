@@ -19,8 +19,6 @@ class DefPlayer(Player):
 
    def compute_moves(self, map, first_player, depth, alpha : int = -10**7, beta : int = 10**7):
 
-      # TODO: it lacks alpha-beta optimization, it requires alpha and beta levels, to drop further checks if not possible to pick
-
       compare_function = max if (self.__depth - depth) % 2 == 0 else min # we want to maximize, when the enemy wants to minimize
       final_moves = []
       final_result = -10**7 if (self.__depth - depth) % 2 == 0 else 10**7 
@@ -41,48 +39,24 @@ class DefPlayer(Player):
                move_value = -10**3 if (self.__depth - depth) % 2 == 0 else 10**3
             final_result = compare_function(final_result, move_value)
             if move_value == final_result:
-               moves = [moves[i][indexes[i]] for i in range(len(indexes))]
-               final_moves = moves
+               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
             continue
          elif depth <= 1:
             side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
-            _c_moves = [map.get_possible_moves(side_to_compute)]
-            _c_indexes = [0]
-            _distances = {}
-            _res = -10**5
 
-            while _c_moves:
-               ## TODO: REFACTOR IT, it is the worst way to test distance to the gate, it needs to be checked by point, not by path
-               _c_index = _c_indexes[-1]
+            dist_map = map.get_distance_map()
 
-               map.make_move(_c_moves[-1][_c_index], side_to_compute)
+            _cf = max if side_to_compute else min
 
-               if map.is_end_of_game():
-                  if map.is_goal(not side_to_compute):
-                     _res = max(_res, -1 * len(_c_indexes))
-               else:
-                  pos = map.get_position()
-                  if pos not in _distances or _distances[pos] > len(_c_indexes):
-                     _distances[pos] = len(_c_indexes)
-                     _c_moves.append(map.get_possible_moves(side_to_compute))
-                     _c_indexes.append(0)
-                     continue
+            gate = _cf([k[1] for k in dist_map.keys()])
 
-               map.revert_move(_c_moves[-1][_c_index], side_to_compute)
+            keys = [k for k in dist_map.keys() if k[1] == gate]
 
-               _c_indexes[-1] += 1
-               
-               while _c_indexes and _c_moves and _c_indexes[-1] >= len(_c_moves[-1]):
-                  _c_indexes.pop()
-                  _c_moves.pop()
-
-                  if _c_indexes and _c_moves:
-                     map.revert_move(_c_moves[-1][_c_indexes[-1]], side_to_compute)
-
-                     _c_indexes[-1] += 1
+            _min_dist = min([dist_map[k] for k in keys])
+            _res = -1 * _min_dist
 
             result = _res
             final_result = compare_function(final_result, result)
