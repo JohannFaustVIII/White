@@ -256,7 +256,7 @@ class Map:
             p = point[0]
             x = p[0]
             y = p[1]
-            distance = 0
+            distance = point[1]
 
             if y == -1 or y == self.__height + 1:
                 continue

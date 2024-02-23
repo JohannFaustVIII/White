@@ -33,7 +33,7 @@ class DefPlayer(Player):
          map.make_move(moves[-1][index], first_player)
 
          if map.is_end_of_game():
-            if map.is_goal(first_player):
+            if map.is_goal(first_player): # is it correct?
                move_value = 10**3 if (self.__depth - depth) % 2 == 0 else -10**3
             else:
                move_value = -10**3 if (self.__depth - depth) % 2 == 0 else 10**3
@@ -66,6 +66,7 @@ class DefPlayer(Player):
          else:
             _, result = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
 
+            # TODO: FIX BELOW AND FIX FOR INSTANT WIN OPTION
             if (self.__depth - depth) % 2 == 0:
                if result > beta:
                   while moves:
