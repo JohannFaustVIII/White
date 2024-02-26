@@ -21,7 +21,7 @@ class DefPlayer(Player):
 
       compare_function = max if (self.__depth - depth) % 2 == 0 else min # we want to maximize, when the enemy wants to minimize
       final_moves = []
-      final_result = -10**7 if (self.__depth - depth) % 2 == 0 else 10**7 
+      final_result = -10**7 if (self.__depth - depth) % 2 == 0 else 10**7 # FIXME: WHAT IF NO OPTION IS GENERATED?
 
       moves = [map.get_possible_moves(first_player)]
       indexes = [0]
@@ -33,13 +33,29 @@ class DefPlayer(Player):
          map.make_move(moves[-1][index], first_player)
 
          if map.is_end_of_game():
+            if depth == self.__depth:
+               print('I see the end')
             if map.is_goal(first_player): # is it correct?
                move_value = 10**3 if (self.__depth - depth) % 2 == 0 else -10**3
             else:
                move_value = -10**3 if (self.__depth - depth) % 2 == 0 else 10**3
-            final_result = compare_function(final_result, move_value)
-            if move_value == final_result:
-               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+            ignore_value = False
+            if (self.__depth - depth) % 2 == 0:
+               if move_value > beta:
+                  ignore_value = True
+               else:
+                  alpha = max(alpha, move_value)
+            else:
+               if move_value < alpha:
+                  ignore_value = True
+               else:
+                  beta = min(beta, move_value)
+            if not ignore_value:
+               final_result = compare_function(final_result, move_value)
+               if move_value == final_result:
+                  final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+            if depth == self.__depth:
+               print(f'Do I ignore it? {ignore_value} {compare_function} {final_result} {final_moves}')   
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
@@ -104,5 +120,6 @@ class DefPlayer(Player):
                indexes[-1] += 1
 
       # return the best, currently saved option
-
+      if depth == self.__depth:
+         print(f'End value = {final_result} {final_moves}')
       return final_moves, final_result
