@@ -33,12 +33,10 @@ class DefPlayer(Player):
          map.make_move(moves[-1][index], first_player)
 
          if map.is_end_of_game():
-            if depth == self.__depth:
-               print('I see the end')
             if map.is_goal(first_player): # is it correct?
-               move_value = 10**3 if (self.__depth - depth) % 2 == 0 else -10**3
+               move_value = 10**3 + depth if (self.__depth - depth) % 2 == 0 else -10**3 - depth
             else:
-               move_value = -10**3 if (self.__depth - depth) % 2 == 0 else 10**3
+               move_value = -10**3 - depth if (self.__depth - depth) % 2 == 0 else 10**3 + depth
             ignore_value = False
             if (self.__depth - depth) % 2 == 0:
                if move_value > beta:
@@ -54,8 +52,6 @@ class DefPlayer(Player):
                final_result = compare_function(final_result, move_value)
                if move_value == final_result:
                   final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
-            if depth == self.__depth:
-               print(f'Do I ignore it? {ignore_value} {compare_function} {final_result} {final_moves}')   
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
@@ -82,31 +78,28 @@ class DefPlayer(Player):
          else:
             _, result = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
 
-            # TODO: FIX BELOW AND FIX FOR INSTANT WIN OPTION
-            if (self.__depth - depth) % 2 == 0:
-               if result > beta:
-                  while moves:
-                     _ei = indexes[-1]
-                     _em = moves[-1][_ei]
-                     map.revert_move(_em, first_player)
-                     indexes.pop()
-                     moves.pop()
-                  return final_moves, final_result
-               alpha = max(alpha, result)
-            else:
-               if result < alpha:
-                  while moves:
-                     _ei = indexes[-1]
-                     _em = moves[-1][_ei]
-                     map.revert_move(_em, first_player)
-                     indexes.pop()
-                     moves.pop()
-                  return final_moves, final_result
-               beta = min(beta, result)    
+            # TODO: refactor below
+            ignore_value = False
 
-            final_result = compare_function(final_result, result)
-            if result == final_result:
-               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+            if result == 10**7 or result == -10**7:
+               ignore_value = True
+
+            if not ignore_value:
+               if (self.__depth - depth) % 2 == 0:
+                  if result > beta:
+                     ignore_value = True
+                  else:
+                     alpha = max(alpha, result)
+               else:
+                  if result < alpha:
+                     ignore_value = True
+                  else:
+                     beta = min(beta, result)    
+            
+            if not ignore_value:
+               final_result = compare_function(final_result, result)
+               if result == final_result:
+                  final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
 
          map.revert_move(moves[-1][index], first_player)
 
@@ -119,7 +112,4 @@ class DefPlayer(Player):
                map.revert_move(moves[-1][indexes[-1]], first_player)
                indexes[-1] += 1
 
-      # return the best, currently saved option
-      if depth == self.__depth:
-         print(f'End value = {final_result} {final_moves}')
       return final_moves, final_result
