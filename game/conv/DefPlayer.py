@@ -37,69 +37,20 @@ class DefPlayer(Player):
                move_value = 10**3 + depth if (self.__depth - depth) % 2 == 0 else -10**3 - depth
             else:
                move_value = -10**3 - depth if (self.__depth - depth) % 2 == 0 else 10**3 + depth
-            ignore_value = False
-            if (self.__depth - depth) % 2 == 0:
-               if move_value > beta:
-                  ignore_value = True
-               else:
-                  alpha = max(alpha, move_value)
-            else:
-               if move_value < alpha:
-                  ignore_value = True
-               else:
-                  beta = min(beta, move_value)
-            if not ignore_value:
-               final_result = compare_function(final_result, move_value)
-               if move_value == final_result:
-                  final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
             continue
          elif depth <= 1:
-            side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
+            move_value = self.compute_distance_to_own_gate(depth, first_player, map)
 
-            dist_map = map.get_distance_map()
 
-            _cf = max if side_to_compute else min
-
-            gate = _cf([k[1] for k in dist_map.keys()])
-
-            keys = [k for k in dist_map.keys() if k[1] == gate]
-
-            _min_dist = min([dist_map[k] for k in keys])
-            _res = -1 * _min_dist
-
-            result = _res
-            final_result = compare_function(final_result, result)
-            if result == final_result:
-               final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
-            pass
-         else:
-            _, result = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
-
-            # TODO: refactor below
-            ignore_value = False
-
-            if result == 10**7 or result == -10**7:
-               ignore_value = True
-
-            if not ignore_value:
-               if (self.__depth - depth) % 2 == 0:
-                  if result > beta:
-                     ignore_value = True
-                  else:
-                     alpha = max(alpha, result)
-               else:
-                  if result < alpha:
-                     ignore_value = True
-                  else:
-                     beta = min(beta, result)    
             
-            if not ignore_value:
-               final_result = compare_function(final_result, result)
-               if result == final_result:
-                  final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+         else:
+            _, move_value = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
+
+         alpha, beta, ignore, result = self.compute_alpha_and_beta(depth, alpha, beta, move_value)
+         final_result, final_moves = self.compute_final(ignore, result, moves, indexes, compare_function, final_result, final_moves)
 
          map.revert_move(moves[-1][index], first_player)
 
@@ -113,3 +64,50 @@ class DefPlayer(Player):
                indexes[-1] += 1
 
       return final_moves, final_result
+   
+   def compute_distance_to_own_gate(self, depth, first_player, map):
+         side_to_compute = first_player if (self.__depth - depth) % 2 == 0 else not first_player
+
+         dist_map = map.get_distance_map()
+
+         compare_function = max if side_to_compute else min
+
+         gate_y = compare_function([k[1] for k in dist_map.keys()])
+
+         keys = [k for k in dist_map.keys() if k[1] == gate_y]
+
+         _min_dist = min([dist_map[k] for k in keys])
+         move_value = -1 * _min_dist
+
+         return move_value
+
+
+   def compute_alpha_and_beta(self, depth, alpha, beta, value):
+         ignore_value = False
+
+         if value == 10**7 or value == -10**7:
+            ignore_value = True
+
+         if not ignore_value:
+            if (self.__depth - depth) % 2 == 0:
+               if value > beta:
+                  ignore_value = True
+               else:
+                  alpha = max(alpha, value)
+            else:
+               if value < alpha:
+                  ignore_value = True
+               else:
+                  beta = min(beta, value)
+
+         return alpha, beta, ignore_value, value
+
+   def compute_final(self, ignore, result, moves, indexes, compare_function, final_result, final_moves):
+      if ignore:
+         return final_result, final_moves
+      
+      final_result = compare_function(final_result, result)
+      if result == final_result:
+         final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+
+      return final_result, final_moves
