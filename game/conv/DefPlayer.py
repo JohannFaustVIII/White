@@ -52,19 +52,19 @@ class DefPlayer(Player):
          else:
             
             _, move_value = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
-            if depth == self.__depth:
-               print(f'Depth = {depth}, moves = {[moves[i][indexes[i]] for i in range(len(indexes))]}, move_value = {move_value}, distance = {distance}')
 
-         alpha, beta, ignore, result = self.compute_alpha_and_beta(depth, alpha, beta, move_value)
-         # if is_final:
-         #    print(depth, alpha, beta, ignore, result)
+         alpha, beta, ignore, result, full_ignore = self.compute_alpha_and_beta(depth, alpha, beta, move_value)
+
+         if full_ignore:
+            while indexes and moves:
+               map.revert_move(moves[-1][indexes[-1]], first_player)
+               indexes.pop()
+               moves.pop()
+            return None, None
+
          if result != None:
             result = result + distance
-         if depth == self.__depth:
-            print(f'Previous final_result = {final_result}, final_moves = {final_moves}')
          final_result, final_moves = self.compute_final(ignore, result, moves, indexes, compare_function, final_result, final_moves)
-         if depth == self.__depth:
-            print(f'New final_result = {final_result}, final_moves = {final_moves}')
 
          map.revert_move(moves[-1][index], first_player)
 
@@ -98,24 +98,24 @@ class DefPlayer(Player):
 
    def compute_alpha_and_beta(self, depth, alpha, beta, value):
          ignore_value = False
+         full_ignore = False
 
          if value == None:
             ignore_value = True
 
-         # TODO: fix the code below, as it doesn't optimize anything
-         # if not ignore_value:
-         #    if (self.__depth - depth) % 2 == 0:
-         #       if value[0] > beta:
-         #          ignore_value = True
-         #       else:
-         #          alpha = max(alpha, value[0])
-         #    else:
-         #       if value[0] < alpha:
-         #          ignore_value = True
-         #       else:
-         #          beta = min(beta, value[0])
+         if not ignore_value:
+            if (self.__depth - depth) % 2 == 0:
+               if value[0] > beta:
+                  full_ignore = True
+               else:
+                  alpha = max(alpha, value[0])
+            else:
+               if value[0] < alpha:
+                  full_ignore = True
+               else:
+                  beta = min(beta, value[0])
 
-         return alpha, beta, ignore_value, value
+         return alpha, beta, ignore_value, value, full_ignore
 
    def compute_final(self, ignore, result, moves, indexes, compare_function, final_result, final_moves):
       if ignore:
