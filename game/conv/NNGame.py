@@ -3,6 +3,7 @@ import numpy as np
 import sklearn.model_selection
 from Game import Game
 from NNPlayer import NNPlayer
+from DefPlayer import DefPlayer
 from StateData import StateData
 from multiprocessing import Queue
 from multiprocessing import Process
@@ -127,11 +128,15 @@ class NNGame:
     def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
         model = self.__load_model(model_file)
         states_data = {}
-        player = NNPlayer(model, discover)
+        nn_player = NNPlayer(model, discover)
+        def_player = DefPlayer(depth = 3, use_memory = True)
 
         for i in range(iterations):
             self.__print_game_number(name, i)
-            game = Game(player, player, True)
+            if i % 2 == 0:
+                game = Game(nn_player, def_player, True)
+            else:
+                game = Game(def_player, nn_player, True)
             game.play_game()
             self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
             self.__update_states(states_data, StateData.increase_loses, game.get_loser_states())
