@@ -4,10 +4,13 @@ from Player import Player
 # alpha-beta algorithm, an oponnent for NN to learn at the begin
 class DefPlayer(Player):
 
-   def __init__(self, depth : int = 1, verbose : bool = False) -> None:
+   moves_memory = {}
+
+   def __init__(self, depth : int = 1, verbose : bool = False, use_memory : bool = False) -> None:
       super().__init__()
       self.__depth = depth
       self.__verbose = verbose
+      self.__use_memory = use_memory
 
    def get_move(self, map : Map, first_player : bool) -> list[int]:
       self.first_player = first_player
@@ -19,6 +22,13 @@ class DefPlayer(Player):
       return computed_moves
 
    def compute_moves(self, map, first_player, depth, alpha : int = -10**7, beta : int = 10**7):
+
+      if self.__use_memory:
+         __state = map.get_points(first_player)
+         t_state = tuple([tuple(s) for s in __state])
+         if t_state in DefPlayer.moves_memory:
+            return DefPlayer.moves_memory[t_state]
+
 
       distance = [self.compute_distance_to_own_gate(depth, first_player, map)]
 
@@ -77,6 +87,11 @@ class DefPlayer(Player):
                map.revert_move(moves[-1][indexes[-1]], first_player)
                indexes[-1] += 1
 
+      if self.__use_memory:
+         __state = map.get_points(first_player)
+         t_state = tuple([tuple(s) for s in __state])
+         DefPlayer.moves_memory[t_state] = (final_moves, final_result)
+      
       return final_moves, final_result
    
    def compute_distance_to_own_gate(self, depth, first_player, map):
@@ -126,7 +141,7 @@ class DefPlayer(Player):
          final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
       else:
          index = 0
-         while index < len(final_result) and final_result[index] == result[index]:
+         while index < len(result) and index < len(final_result) and final_result[index] == result[index]:
             index += 1
          if index < len(final_result):
             final_val = compare_function(final_result[index], result[index])
