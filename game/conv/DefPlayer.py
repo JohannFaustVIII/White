@@ -25,9 +25,11 @@ class DefPlayer(Player):
 
       if self.__use_memory:
          __state = map.get_points(first_player)
-         t_state = tuple([tuple(s) for s in __state])
+         t_state = tuple([tuple(s) for s in __state]) 
          if t_state in DefPlayer.moves_memory:
-            return DefPlayer.moves_memory[t_state]
+            saved_value = DefPlayer.moves_memory[t_state]
+            if len(saved_value[1]) > depth:
+               return saved_value
 
 
       distance = [self.compute_distance_to_own_gate(depth, first_player, map)]
