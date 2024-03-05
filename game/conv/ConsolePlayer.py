@@ -16,3 +16,6 @@ class ConsolePlayer(Player):
             if move not in possible_moves:
                 print("Provided move is not possible!!!")
         return move
+    
+    def get_name(self) -> str:
+        return "ConsolePlayer"

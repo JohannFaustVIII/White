@@ -51,3 +51,6 @@ class NNPlayer(Player):
             return value
         else:
             return NNPlayer.predict_memory[k]
+    
+    def get_name(self) -> str:
+        return "NNPlayer"

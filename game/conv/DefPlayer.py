@@ -151,3 +151,6 @@ class DefPlayer(Player):
                final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
 
       return final_result, final_moves
+   
+   def get_name(self) -> str:
+      return "DefPlayer"

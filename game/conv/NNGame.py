@@ -132,12 +132,14 @@ class NNGame:
         def_player = DefPlayer(depth = 3, use_memory = True)
 
         for i in range(iterations):
+            first_player = nn_player if i % 2 == 0 else def_player
+            second_player = nn_player if i % 2 == 1 else def_player
+
+
             self.__print_game_number(name, i)
-            if i % 2 == 0:
-                game = Game(nn_player, def_player, True)
-            else:
-                game = Game(def_player, nn_player, True)
+            game = Game(first_player, second_player, True)
             game.play_game()
+            self.__print_winner(name, i, game, first_player, second_player)
             self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
             self.__update_states(states_data, StateData.increase_loses, game.get_loser_states())
         
@@ -152,6 +154,9 @@ class NNGame:
     def __print_game_number(self, name: str, number: int):
         if number % 1 == 0:
             print(f'Process={name}: Game number:{number}')
+    
+    def __print_winner(self, name: str, number: int, game: Game, first_player, second_player):
+        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}")
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
