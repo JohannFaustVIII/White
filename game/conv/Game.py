@@ -21,6 +21,8 @@ class Game:
         while not self.__map.is_end_of_game():
             move = self.__first_player.get_move(self.__map, True) if is_first_player_move else self.__second_player.get_move(self.__map, False)
             if move.__class__ == list:
+                if not move:
+                    print(f'Moves were not generated, moves = {move}')
                 self.__map.make_move(move[0], is_first_player_move)
                 move.pop(0)
                 while self.__map.is_continuous_move_possible() and move:

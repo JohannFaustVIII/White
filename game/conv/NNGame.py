@@ -129,7 +129,7 @@ class NNGame:
         model = self.__load_model(model_file)
         states_data = {}
         nn_player = NNPlayer(model, discover)
-        def_player = DefPlayer(depth = 3, use_memory = True)
+        def_player = DefPlayer(depth = 2, use_memory = True)
 
         for i in range(iterations):
             first_player = nn_player if i % 2 == 0 else def_player

@@ -28,7 +28,7 @@ class DefPlayer(Player):
          t_state = tuple([tuple(s) for s in __state]) 
          if t_state in DefPlayer.moves_memory:
             saved_value = DefPlayer.moves_memory[t_state]
-            if len(saved_value[1]) > depth:
+            if len(saved_value[1]) > depth and len(saved_value[0]) > 0:
                return saved_value
 
 
@@ -89,11 +89,15 @@ class DefPlayer(Player):
                map.revert_move(moves[-1][indexes[-1]], first_player)
                indexes[-1] += 1
 
+      if depth == self.__depth and len(final_moves) == 0:
+         print('DefPlayer chooses first possible move')
+         final_moves = [map.get_possible_moves(first_player)]
+
       if self.__use_memory:
          __state = map.get_points(first_player)
          t_state = tuple([tuple(s) for s in __state])
          DefPlayer.moves_memory[t_state] = (final_moves, final_result)
-      
+
       return final_moves, final_result
    
    def compute_distance_to_own_gate(self, depth, first_player, map):
@@ -145,12 +149,15 @@ class DefPlayer(Player):
          index = 0
          while index < len(result) and index < len(final_result) and final_result[index] == result[index]:
             index += 1
-         if index < len(final_result):
+         if index < len(final_result) and index < len(result):
             final_val = compare_function(final_result[index], result[index])
 
             if final_val == result[index]:
                final_result = result
                final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
+         elif len(result) > len(final_result):
+            final_result = result
+            final_moves = [moves[i][indexes[i]] for i in range(len(indexes))]
 
       return final_result, final_moves
    
