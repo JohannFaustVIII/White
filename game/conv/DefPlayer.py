@@ -50,19 +50,16 @@ class DefPlayer(Player):
 
          map.make_move(moves[-1][index], first_player)
 
-         is_final = False
          if map.is_end_of_game():
             if map.is_goal(self.first_player): # is it correct?
                move_value = [10**3]
             else:
                move_value = [-10**3]
-            is_final = True
          elif map.is_continuous_move_possible():
             moves.append(map.get_possible_moves(first_player))
             indexes.append(0)
             continue
          else:
-            
             _, move_value = self.compute_moves(map, not first_player, depth - 1, alpha, beta)
 
          alpha, beta, ignore, result, full_ignore = self.compute_alpha_and_beta(depth, alpha, beta, move_value)
@@ -90,7 +87,8 @@ class DefPlayer(Player):
                indexes[-1] += 1
 
       if depth == self.__depth and len(final_moves) == 0:
-         print('DefPlayer chooses first possible move')
+         if self.__verbose:
+            print('DefPlayer chooses first possible move')
          final_moves = [map.get_possible_moves(first_player)]
 
       if self.__use_memory:
