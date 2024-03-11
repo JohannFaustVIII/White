@@ -1,5 +1,6 @@
 from Map import Map
 from Player import Player
+import time
 
 class Game:
 
@@ -11,6 +12,8 @@ class Game:
         self.__map = Map(8, 10)
         self.__first_player = first_player
         self.__second_player = second_player
+        self.__fp_time = 0
+        self.__sp_time = 0
         
         self.__register_moves = register_moves
         self.__first_player_states = []
@@ -19,7 +22,14 @@ class Game:
     def play_game(self):
         is_first_player_move = True
         while not self.__map.is_end_of_game():
+            start_time = time.time()
             move = self.__first_player.get_move(self.__map, True) if is_first_player_move else self.__second_player.get_move(self.__map, False)
+            end_time = time.time()
+            time_diff = end_time - start_time
+            if is_first_player_move:
+                self.__fp_time += time_diff
+            else:
+                self.__sp_time += time_diff
             if move.__class__ == list:
                 if not move:
                     print(f'Moves were not generated, moves = {move}')
@@ -66,3 +76,6 @@ class Game:
         if not self.is_game_finished:
             return []
         return self.__first_player_states if self.is_second_player_win else self.__second_player_states
+    
+    def get_stats(self):
+        return f'\t{type(self.__first_player)}; move time = {self.__fp_time}\n\t{type(self.__second_player)}; move time = {self.__sp_time}'

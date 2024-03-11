@@ -125,6 +125,7 @@ class NNGame:
             p.join()
         print('Finished joining processes')
         
+    # TODO: think how to speed it up
     def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
         model = self.__load_model(model_file)
         states_data = {}
@@ -156,7 +157,7 @@ class NNGame:
             print(f'Process={name}: Game number:{number}')
     
     def __print_winner(self, name: str, number: int, game: Game, first_player, second_player):
-        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}")
+        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}\n{game.get_stats()}")
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
