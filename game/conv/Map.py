@@ -276,4 +276,10 @@ class Map:
         
         return res
                 
+    def get_tuple_state(self, first_player : bool):
+        __state = self.get_points(first_player)
+        t_state = tuple([tuple(s) for s in __state])
+
+        return t_state
+        
 

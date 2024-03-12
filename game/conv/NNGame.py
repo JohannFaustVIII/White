@@ -125,7 +125,7 @@ class NNGame:
             p.join()
         print('Finished joining processes')
         
-    # TODO: think how to speed it up
+    # TODO: think how to speed it up (or accelerate DefPlayer?)
     def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
         model = self.__load_model(model_file)
         states_data = {}

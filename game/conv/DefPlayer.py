@@ -24,8 +24,7 @@ class DefPlayer(Player):
    def compute_moves(self, map, first_player, depth, alpha : int = -10**7, beta : int = 10**7):
 
       if self.__use_memory:
-         __state = map.get_points(first_player)
-         t_state = tuple([tuple(s) for s in __state]) 
+         t_state = map.get_tuple_state(first_player)
          if t_state in DefPlayer.moves_memory:
             saved_value = DefPlayer.moves_memory[t_state]
             if len(saved_value[1]) > depth and len(saved_value[0]) > 0:
@@ -92,8 +91,7 @@ class DefPlayer(Player):
          final_moves = [map.get_possible_moves(first_player)]
 
       if self.__use_memory:
-         __state = map.get_points(first_player)
-         t_state = tuple([tuple(s) for s in __state])
+         t_state = map.get_tuple_state(first_player)
          DefPlayer.moves_memory[t_state] = (final_moves, final_result)
 
       return final_moves, final_result
