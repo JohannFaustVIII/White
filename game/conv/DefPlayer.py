@@ -12,6 +12,10 @@ class DefPlayer(Player):
       self.__verbose = verbose
       self.__use_memory = use_memory
 
+      self.__memory_reads = 0
+      self.__memory_returns = 0
+      self.__memory_saves = 0
+
    def get_move(self, map : Map, first_player : bool) -> list[int]:
       self.first_player = first_player
       computed_moves, _ = self.compute_moves(map, first_player, self.__depth)
@@ -26,9 +30,16 @@ class DefPlayer(Player):
       if self.__use_memory:
          t_state = map.get_tuple_state(first_player)
          if t_state in DefPlayer.moves_memory:
+            self.__memory_reads += 1
             saved_value = DefPlayer.moves_memory[t_state]
             if len(saved_value[1]) > depth and len(saved_value[0]) > 0:
+               if self.__verbose:
+                  print(f'DefPlayer - Value read and returned from memory.')
+               self.__memory_returns += 1
                return saved_value
+            else:
+               if self.__verbose:
+                  print(f'DefPlayer - Value read, but not returned.')
 
 
       distance = [self.compute_distance_to_own_gate(depth, first_player, map)]
@@ -91,6 +102,9 @@ class DefPlayer(Player):
          final_moves = [map.get_possible_moves(first_player)]
 
       if self.__use_memory:
+         self.__memory_saves += 1
+         if self.__verbose:
+            print(f'DefPlayer - Value saved into memory.')
          t_state = map.get_tuple_state(first_player)
          DefPlayer.moves_memory[t_state] = (final_moves, final_result)
 
