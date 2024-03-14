@@ -8,3 +8,6 @@ class Player:
 
     def get_name(self) -> str:
         pass
+
+    def get_stats(self) -> list:
+        return []

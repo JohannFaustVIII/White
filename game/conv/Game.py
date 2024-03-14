@@ -78,4 +78,16 @@ class Game:
         return self.__first_player_states if self.is_second_player_win else self.__second_player_states
     
     def get_stats(self):
-        return f'\t{type(self.__first_player)}; move time = {self.__fp_time}\n\t{type(self.__second_player)}; move time = {self.__sp_time}'
+        stats = []
+        stats.append(f'\t{type(self.__first_player)}; move time = {self.__fp_time}')
+        f_stats = self.__first_player.get_stats()
+        if f_stats:
+            for s in f_stats:
+                stats.append(f'\t\t{s}')
+        
+        stats.append(f'\t{type(self.__second_player)}; move time = {self.__sp_time}')
+        s_stats = self.__second_player.get_stats()
+        if s_stats:
+            for s in s_stats:
+                stats.append(f'\t\t{s}')
+        return stats

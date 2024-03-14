@@ -5,7 +5,7 @@ from Player import Player
 class DefPlayer(Player):
 
    moves_memory = {}
-
+   
    def __init__(self, depth : int = 1, verbose : bool = False, use_memory : bool = False) -> None:
       super().__init__()
       self.__depth = depth
@@ -15,10 +15,16 @@ class DefPlayer(Player):
       self.__memory_reads = 0
       self.__memory_returns = 0
       self.__memory_saves = 0
+      self.__depth_counter = {3 : 0, 2 : 0, 1 : 0, 0 : 0}
 
    def get_move(self, map : Map, first_player : bool) -> list[int]:
       self.first_player = first_player
+      starting_map = map.get_tuple_state(first_player)
       computed_moves, _ = self.compute_moves(map, first_player, self.__depth)
+      end_map = map.get_tuple_state(first_player)
+
+      if any(starting_map[i] != end_map[i] for i in range(len(starting_map))):
+         print('~~~ DefPlayer changed map!!! ~~~')
 
       if self.__verbose:
          print(f'Def player moves = {computed_moves}')
@@ -41,6 +47,7 @@ class DefPlayer(Player):
                if self.__verbose:
                   print(f'DefPlayer - Value read, but not returned.')
 
+      self.__depth_counter[depth] += 1
 
       distance = [self.compute_distance_to_own_gate(depth, first_player, map)]
 
@@ -173,3 +180,15 @@ class DefPlayer(Player):
    
    def get_name(self) -> str:
       return "DefPlayer"
+   
+   def get_stats(self) -> list:
+      __result =  [
+         f'End memory size: {len(DefPlayer.moves_memory)}', 
+         f'Memory reads: {self.__memory_reads}',
+         f'Memory returns: {self.__memory_returns}',
+         f'Memory saves: {self.__memory_saves}',
+      ]
+
+      __result += [f'Depth {k} calls: {self.__depth_counter[k]}' for k in self.__depth_counter.keys()]
+
+      return __result

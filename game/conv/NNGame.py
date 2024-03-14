@@ -157,7 +157,8 @@ class NNGame:
             print(f'Process={name}: Game number:{number}')
     
     def __print_winner(self, name: str, number: int, game: Game, first_player, second_player):
-        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}\n{game.get_stats()}")
+        stats = '\n'.join(game.get_stats())
+        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}\n{stats}")
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
