@@ -14,12 +14,14 @@ class Game:
         self.__second_player = second_player
         self.__fp_time = 0
         self.__sp_time = 0
-        
+        self.__turns = 0
+
         self.__register_moves = register_moves
         self.__first_player_states = []
         self.__second_player_states = []
     
     def play_game(self):
+        self.__turns += 1
         is_first_player_move = True
         while not self.__map.is_end_of_game():
             start_time = time.time()
@@ -50,6 +52,7 @@ class Game:
                 self.__first_player_states.append(state) if is_first_player_move else self.__second_player_states.append(state)
             if not self.__map.is_continuous_move_possible() and not self.__map.is_end_of_game():
                 is_first_player_move = not is_first_player_move
+                self.__turns += 1
         self.is_game_finished = True
         self.decide_winner(is_first_player_move)
 
@@ -79,6 +82,7 @@ class Game:
     
     def get_stats(self):
         stats = []
+        stats.append(f'\t Turns: {self.__turns}')
         stats.append(f'\t{type(self.__first_player)}; move time = {self.__fp_time}')
         f_stats = self.__first_player.get_stats()
         if f_stats:
