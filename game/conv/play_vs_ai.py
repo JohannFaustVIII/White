@@ -5,13 +5,13 @@ if __name__ == "__main__":
 
   side = sys.argv[1]
   if side[0] == 'd':
-    from DefPlayer import DefPlayer
+    from AgroPlayer import AgroPlayer
 
     side = side[1:]
     is_first_player = side == "1"
 
-    first_player = ConsolePlayer(name = "First player", show_map = True) if is_first_player else DefPlayer(depth = 3, verbose = True)
-    second_player = ConsolePlayer(name = "Second player", show_map = True) if not is_first_player else DefPlayer(depth = 3, verbose = True)
+    first_player = ConsolePlayer(name = "First player", show_map = True) if is_first_player else AgroPlayer(depth = 3, verbose = True)
+    second_player = ConsolePlayer(name = "Second player", show_map = True) if not is_first_player else AgroPlayer(depth = 3, verbose = True)
   
   else:
     is_first_player = side == "1"

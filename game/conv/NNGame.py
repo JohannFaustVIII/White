@@ -3,7 +3,7 @@ import numpy as np
 import sklearn.model_selection
 from Game import Game
 from NNPlayer import NNPlayer
-from DefPlayer import DefPlayer
+from AgroPlayer import AgroPlayer
 from StateData import StateData
 from multiprocessing import Queue
 from multiprocessing import Process
@@ -130,7 +130,7 @@ class NNGame:
         model = self.__load_model(model_file)
         states_data = {}
         nn_player = NNPlayer(model, discover)
-        def_player = DefPlayer(depth = 2, use_memory = True)
+        def_player = AgroPlayer(depth = 2, use_memory = True)
 
         for i in range(iterations):
             first_player = nn_player if i % 2 == 0 else def_player
