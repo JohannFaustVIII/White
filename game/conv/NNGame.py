@@ -14,7 +14,7 @@ class NNGame:
     __states_data = {}
     __process_queue = Queue()
 
-    def train(self, file_name: str, games_per_process: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100):
+    def train(self, file_name: str, games_per_process: int, discover : float, model_file: str, loops: int = 1, progressive : bool = False, discover_degradation  : float = 0.0, processes_to_spawn : int = 1, epochs : int = 100, verbose : bool = False):
         counter = 0
         NNGame.__show_model_summary(model_file)
 
@@ -22,8 +22,8 @@ class NNGame:
             loop_file_name = NNGame.__get_progressive_file_name(progressive, file_name, counter)
             counter += 1
             print(f'Loop: {counter}, discover = {discover}')
-            measure_time("generating games", lambda : self.generate_data(loop_file_name, games_per_process, discover, model_file, processes_to_spawn))
-            measure_time("training session", lambda : self.__train(loop_file_name, model_file, epochs))
+            measure_time("generating games", lambda : self.generate_data(loop_file_name, games_per_process, discover, model_file, processes_to_spawn, verbose))
+            measure_time("training session", lambda : self.__train(loop_file_name, model_file, epochs, verbose))
             discover = NNGame.__get_progressive_discovery(discover, discover_degradation)
 
     def __show_model_summary(model_file : str):
@@ -47,7 +47,7 @@ class NNGame:
     def __get_progressive_discovery(actual_discovery: float, degradation: float) -> float:
         return max(0.01, actual_discovery - degradation)
 
-    def __train(self, file_name: str, model_file: str, ep : int):
+    def __train(self, file_name: str, model_file: str, ep : int, verbose : bool = False):
 
         def internal_training():
             model = self.__load_model(model_file)
@@ -91,19 +91,19 @@ class NNGame:
 
         return (x, y)
 
-    def generate_data(self, file_name: str, iterations: int, discover: float, model_file: str, processes : int = 1):
+    def generate_data(self, file_name: str, iterations: int, discover: float, model_file: str, processes : int = 1, verbose : bool = False):
         if iterations > 0:
             NNPlayer.clean_memory()
             self.__states_data = measure_time("loading states from file", lambda : StateData.load_states(file_name))
-            proc_list = self.__spawn_playing_processes(iterations, discover, model_file, processes)
+            proc_list = self.__spawn_playing_processes(iterations, discover, model_file, processes, verbose)
             self.__read_states_from_processes(proc_list)
             self.__join_processes(proc_list)
             StateData.save_states(self.__states_data, file_name)
         
-    def __spawn_playing_processes(self, iterations: int, discover: float, model_file: str, processes : int):
+    def __spawn_playing_processes(self, iterations: int, discover: float, model_file: str, processes : int, verbose : bool):
         proc_list = []
         for i in range(processes):
-            process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i)))
+            process = Process(target=self.__play_games, args=(iterations, discover, model_file, str(i), verbose))
             proc_list.append(process)
             process.start()
         return proc_list
@@ -125,8 +125,7 @@ class NNGame:
             p.join()
         print('Finished joining processes')
         
-    # TODO: think how to speed it up (or accelerate DefPlayer?)
-    def __play_games(self, iterations: int, discover: float, model_file : str, name : str = ''):
+    def __play_games(self, iterations: int, discover: float, model_file : str, name : str = '', verbose : bool = False):
         model = self.__load_model(model_file)
         states_data = {}
         nn_player = NNPlayer(model, discover)
@@ -140,7 +139,7 @@ class NNGame:
             self.__print_game_number(name, i)
             game = Game(first_player, second_player, True)
             game.play_game()
-            self.__print_winner(name, i, game, first_player, second_player)
+            self.__print_winner(name, i, game, first_player, second_player, verbose)
             self.__update_states(states_data, StateData.increase_wins, game.get_winner_states())
             self.__update_states(states_data, StateData.increase_loses, game.get_loser_states())
         
@@ -156,9 +155,10 @@ class NNGame:
         if number % 1 == 0:
             print(f'Process={name}: Game number:{number}')
     
-    def __print_winner(self, name: str, number: int, game: Game, first_player, second_player):
+    def __print_winner(self, name: str, number: int, game: Game, first_player, second_player, verbose):
         stats = '\n'.join(game.get_stats())
-        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}\n{stats}")
+        stats = '\n' + stats
+        print(f"Process={name}: Game {number} won by {first_player.get_name() if game.is_first_player_win else second_player.get_name()}{stats if verbose else ''}")
     
     def __update_states(self, states_data, increase, states : list[list[int]]) -> None:
         for state in states:
